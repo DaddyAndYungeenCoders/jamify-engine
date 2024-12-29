@@ -11,31 +11,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jams")
+@RequestMapping("/api/jams")
 @Slf4j
 public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     IJamStrategy jamStrategy;
 
     /**
-     * @param jamId the jam the user wants to join
-     * @param userId
-     * FIXME remove userId from parameters and use the one in headers
+     * @param jamId the jam the connected user wants to join
      */
-    @PutMapping("/join")
-    void join(final Long jamId, final Long userId) throws ExecutionControl.NotImplementedException {
-        log.info("[REST CALL] - User with id {}, Joining jam with id {}", jamId, userId);
-        jamStrategy.joinJam(userId, jamId);
+    @PutMapping("/join/{jamId}")
+    void join(@PathVariable("jamId") Long jamId) throws ExecutionControl.NotImplementedException {
+        log.info("[REST CALL] - User Joining jam with id {}", jamId);
+        jamStrategy.joinJam(jamId);
     }
 
     /**
-     * @param jamId the jam the user wants to leave
-     * @param userId
-     * FIXME remove userId from parameters and use the one in headers
+     * @param jamId the jam the connected user wants to leave
      */
-    @PutMapping("/leave")
-    void leave(final Long jamId, final Long userId) throws ExecutionControl.NotImplementedException {
-        log.info("[REST CALL] - User with id {}, Leaving jam with id {}", jamId, userId);
-        jamStrategy.leaveJam(userId, jamId);
+    @PutMapping("/leave/{jamId}")
+    void leave(@PathVariable Long jamId) throws ExecutionControl.NotImplementedException {
+        log.info("[REST CALL] - User Leaving jam with id {}", jamId );
+        jamStrategy.leaveJam(jamId);
     }
 
     /**

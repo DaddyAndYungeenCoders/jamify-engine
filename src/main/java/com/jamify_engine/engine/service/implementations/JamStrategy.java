@@ -19,12 +19,12 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     @Override
-    public void joinJam(Long userId, Long jamId) throws ExecutionControl.NotImplementedException {
+    public void joinJam(Long jamId) throws ExecutionControl.NotImplementedException {
         throw new ExecutionControl.NotImplementedException("not yet");
     }
 
     @Override
-    public void leaveJam(Long userId, Long jamId) throws ExecutionControl.NotImplementedException {
+    public void leaveJam(Long jamId) throws ExecutionControl.NotImplementedException {
         throw new ExecutionControl.NotImplementedException("not yet");
     }
 

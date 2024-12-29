@@ -9,6 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MusicDTO {
-
+public class MusicDTO extends MainDTO {
+    private Long id;
 }
