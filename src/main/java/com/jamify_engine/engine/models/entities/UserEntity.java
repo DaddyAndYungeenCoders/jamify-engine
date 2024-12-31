@@ -20,6 +20,9 @@ public class UserEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<JamEntity> hostedJams;
+
     @Column(name = "user_name")
     private String name;
 

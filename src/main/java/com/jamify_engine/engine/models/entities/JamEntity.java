@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.models.entities;
 
+import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,10 @@ public class JamEntity {
     @Column(name = "jam_id")
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "host_id", nullable = false)
+    private UserEntity host;
+
     @Column(name = "jam_name")
     private String name;
 
@@ -28,7 +33,16 @@ public class JamEntity {
     private LocalDateTime schedStart;
 
     @Column(name = "jam_status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private JamStatusEnum status;
+
+    @ManyToMany
+    @JoinTable(
+            name = "jam_tags",
+            joinColumns = @JoinColumn(name = "jam_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<TagEntity> tags;
 
     @OneToMany(mappedBy = "jam")
     private Set<JamMessageEntity> messages;

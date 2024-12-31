@@ -4,6 +4,7 @@ import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class JamDTO extends MainDTO {
     String name;
     Long hostId;
     JamStatusEnum status;
-    List<String> themes; // List<Tag> ?
-    List<Long> participants;
-    List<JamMessageDTO> messages;
+    Set<String> themes; // List<Tag> ?
+    Set<Long> participants;
+    Set<Long> messages;
 }
