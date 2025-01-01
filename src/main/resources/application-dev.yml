@@ -1,0 +1,8 @@
+security:
+  jwt:
+    public-key: public.pem
+
+gateway:
+  url: http://localhost:5173
+  service:
+    front: /mobile-app
