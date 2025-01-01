@@ -28,7 +28,8 @@ public class EngineSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/api/**").authenticated())
+                        authorize.requestMatchers("/api/**").authenticated()
+                                .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs").permitAll())
                 .build();
     }
 

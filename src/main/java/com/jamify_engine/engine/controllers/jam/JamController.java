@@ -43,6 +43,12 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
         return jamStrategy.getAllInQueue(jamId);
     }
 
+    /**
+     * Play a music in a jam
+     * @param musicId the music we want to broadcast
+     * @param jamId the jam we want to play the music 'in'
+     * @throws ExecutionControl.NotImplementedException
+     */
     @PostMapping("/play/{musicId}/{jamId}")
     void playMusic(@PathVariable final Long musicId, @PathVariable final Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - Playing the music with id {} for every user in jam with id {}", musicId, jamId);

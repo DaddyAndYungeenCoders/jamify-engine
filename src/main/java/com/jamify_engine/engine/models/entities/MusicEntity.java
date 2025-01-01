@@ -20,8 +20,8 @@ public class MusicEntity {
     @Column(name = "music_id")
     private Long id;
 
-    @Column(name = "music_src")
-    private String src;
+    @Column(name = "music_isrc")
+    private String isrc;
     @Column(name = "music_author")
     private String author;
     @Column(name = "music_title")

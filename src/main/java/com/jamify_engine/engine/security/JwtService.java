@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.nio.file.Files;
 import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 
@@ -17,14 +17,14 @@ import java.util.List;
 @Service
 public class JwtService {
 
-    @Value("${security.jwt.private-key}")
-    private String privateKeyPath;
+    @Value("${security.jwt.public-key}")
+    private String publicKeyPath;
 
-    private RSAPrivateKey key;
+    private RSAPublicKey key;
 
     public JwtService() {
         try {
-            key = loadPrivateKey(new File(privateKeyPath));
+            key = loadPublicKey(new File(publicKeyPath));
         } catch (Exception e) {
             log.error("Error loading private key: {}", e.getMessage());
         }
@@ -40,7 +40,7 @@ public class JwtService {
         log.info("Validating token: {}", jwt);
         try {
             if (key == null) {
-                key = loadPrivateKey(new File(privateKeyPath));
+                key = loadPublicKey(new File(publicKeyPath));
             }
 
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt);
@@ -83,19 +83,19 @@ public class JwtService {
                 .get("roles", List.class);
     }
 
-    private RSAPrivateKey loadPrivateKey(File file) throws Exception {
+    private RSAPublicKey loadPublicKey(File file) throws Exception {
         log.debug("[DEV] - Loading private key with path {}", file.toPath());
         String key = Files.readString(file.toPath());
-        String privateKeyPEM = key
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----BEGIN RSA PRIVATE KEY-----", "")  // Support both formats
-                .replace("-----END PRIVATE KEY-----", "")
-                .replace("-----END RSA PRIVATE KEY-----", "")
+        String publicKeyPem = key
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----BEGIN RSA PUBLIC KEY-----", "")  // Support both formats
+                .replace("-----END PUBLIC KEY-----", "")
+                .replace("-----END RSA PUBLIC KEY-----", "")
                 .replaceAll("\\s", "");
 
-        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+        byte[] encoded = Base64.getDecoder().decode(publicKeyPem);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
     }
 }

@@ -2,13 +2,8 @@ package com.jamify_engine.engine.models.dto;
 
 import lombok.*;
 
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
-@AllArgsConstructor
+import java.io.Serializable;
+
 @Builder
-public class MusicDTO extends MainDTO {
-    private Long id;
+public record MusicDTO(Long id) implements Serializable {
 }

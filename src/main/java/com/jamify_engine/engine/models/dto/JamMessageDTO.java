@@ -1,11 +1,10 @@
 package com.jamify_engine.engine.models.dto;
 
+import lombok.Builder;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class JamMessageDTO {
-    private Long id;
-    private Long jamId;
-    private String content;
-    private Long author;
-    private LocalDateTime timestamp;
-}
+@Builder
+public record JamMessageDTO(Long id, Long jamId, String content, Long author, LocalDateTime timestamp)
+        implements Serializable {}

@@ -1,6 +1,5 @@
 security:
   jwt:
-    private-key: private.pem
     public-key: public.pem
 
 gateway:
