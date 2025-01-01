@@ -6,6 +6,7 @@ import com.jamify_engine.engine.models.dto.MusicDTO;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +15,12 @@ import java.util.List;
 @RequestMapping("/api/jams")
 @Slf4j
 public class JamController extends CRUDController<JamDTO, IJamStrategy> {
-    IJamStrategy jamStrategy;
+    private final IJamStrategy jamStrategy;
+
+    @Autowired
+    public JamController(IJamStrategy jamStrategy) {
+        this.jamStrategy = jamStrategy;
+    }
 
     /**
      * @param jamId the jam the connected user wants to join
@@ -52,6 +58,6 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @PostMapping("/play/{musicId}/{jamId}")
     void playMusic(@PathVariable final Long musicId, @PathVariable final Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - Playing the music with id {} for every user in jam with id {}", musicId, jamId);
-        service.playMusic(musicId, jamId);
+        jamStrategy.playMusic(musicId, jamId);
     }
 }
