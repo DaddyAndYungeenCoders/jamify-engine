@@ -25,8 +25,7 @@ spring:
 
 security:
     jwt:
-        private-key: ${JWT_PRIVATE_KEY}
-        public-key: ${JWT_PUBLIC_KEY}
+        public-key: public.pem
 
 gateway:
     url: http://localhost:5173
