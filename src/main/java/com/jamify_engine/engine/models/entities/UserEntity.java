@@ -42,3 +42,5 @@ public class UserEntity {
     private Set<BadgeEntity> badges;
  */
 }
+
+// TODO: Un user ici avec les infos de l'app (jam, event etc...) et un user_uaa avec les infos de l'uaa (email, role etc...) ?
