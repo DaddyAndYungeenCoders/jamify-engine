@@ -1,7 +1,7 @@
 package com.jamify_engine.engine.controllers.auth;
 
 import com.jamify_engine.engine.exceptions.security.InvalidApiKeyException;
-import com.jamify_engine.engine.models.entities.UserAccessTokenEntity;
+import com.jamify_engine.engine.models.dto.UserAccessTokenDto;
 import com.jamify_engine.engine.security.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,8 +33,8 @@ public class AuthController {
             })
     @PostMapping("/access-token")
     public ResponseEntity<Void> saveAccessToken(@RequestHeader(value = "X-API-KEY") String apiKey,
-                                                @RequestBody UserAccessTokenEntity userAccessToken) {
-        log.info("Received request to save access token : {} for user: {}",userAccessToken.getAccessToken(), userAccessToken.getEmail());
+                                                @RequestBody UserAccessTokenDto userAccessToken) {
+        log.info("Received request to save access token : {} for user: {}", userAccessToken.getAccessToken(), userAccessToken.getEmail());
         if (!apiKey.equals(jamifyEngineApiKey)) {
             throw new InvalidApiKeyException("Invalid API key");
         }

@@ -36,7 +36,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
      */
     @PutMapping("/leave/{jamId}")
     void leave(@PathVariable Long jamId) throws ExecutionControl.NotImplementedException {
-        log.info("[REST CALL] - User Leaving jam with id {}", jamId );
+        log.info("[REST CALL] - User Leaving jam with id {}", jamId);
         jamStrategy.leaveJam(jamId);
     }
 
@@ -51,8 +51,9 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
 
     /**
      * Play a music in a jam
+     *
      * @param musicId the music we want to broadcast
-     * @param jamId the jam we want to play the music 'in'
+     * @param jamId   the jam we want to play the music 'in'
      * @throws ExecutionControl.NotImplementedException
      */
     @PostMapping("/play/{musicId}/{jamId}")

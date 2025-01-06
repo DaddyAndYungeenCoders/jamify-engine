@@ -13,17 +13,19 @@ public abstract class CRUDController<T extends Serializable, S extends ServiceBa
 
     /**
      * Creates an entity
-     * @param entity
+     *
+     * @param dto
      * @return the created entity
      * @throws ExecutionControl.NotImplementedException
      */
     @PostMapping("/create")
-    public T create(@RequestBody T entity) throws ExecutionControl.NotImplementedException {
-        return service.create(entity);
+    public T create(@RequestBody T dto) throws ExecutionControl.NotImplementedException {
+        return service.create(dto);
     }
 
     /**
      * find all entities
+     *
      * @return a list of entities
      * @throws ExecutionControl.NotImplementedException
      */
@@ -34,6 +36,7 @@ public abstract class CRUDController<T extends Serializable, S extends ServiceBa
 
     /**
      * find an entity by its id
+     *
      * @param id the entity id in database
      * @return the corresponding entity
      * @throws ExecutionControl.NotImplementedException
@@ -45,7 +48,8 @@ public abstract class CRUDController<T extends Serializable, S extends ServiceBa
 
     /**
      * updates an entity
-     * @param id the entity we want to update
+     *
+     * @param id     the entity we want to update
      * @param entity the new form the entity will have
      * @return the updated entity
      * @throws ExecutionControl.NotImplementedException
@@ -57,6 +61,7 @@ public abstract class CRUDController<T extends Serializable, S extends ServiceBa
 
     /**
      * delete an entity
+     *
      * @param id the id of the entity we want to remove from the database
      * @throws ExecutionControl.NotImplementedException
      */

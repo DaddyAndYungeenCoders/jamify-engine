@@ -1,6 +1,7 @@
 package com.jamify_engine.engine.models.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,19 +22,36 @@ public class UserEntity {
     private Long id;
 
     @Column(name = "user_email")
-    private String email;
-
-    @Column(name = "user_access_token")
-    private String accessToken;
-
-    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<JamEntity> hostedJams;
+    private @NotNull String email;
 
     @Column(name = "user_name")
-    private String name;
+    private @NotNull String name;
+
+    @ElementCollection
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "user_role")
+    private Set<String> roles;
+
+    @Column(name = "user_country")
+    private String country;
+
+    @Column(name = "user_provider")
+    private String provider;
+
+    @Column(name = "user_provider_id")
+    private String userProviderId;
+
+    @Column(name = "user_img_url", length = 1024) // for long imgurl (eg. spotify)
+    private String imgUrl;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserAccessTokenEntity accessToken;
 
     @Column(name = "user_has_jam_running")
     private boolean hasJamRunning;
+
+    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<JamEntity> hostedJams;
 
     @OneToMany(mappedBy = "author")
     private Set<PlaylistEntity> playlists;
