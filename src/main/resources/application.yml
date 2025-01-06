@@ -22,6 +22,11 @@ spring:
             hibernate:
                 format_sql: true
         show-sql: true
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: ${JAMIFY_UAA_BASE_URL}
 
 security:
     jwt:
@@ -37,3 +42,10 @@ springdoc:
         path: /v3/api-docs
     swagger-ui:
         path: /swagger-ui.html
+
+config:
+    uaa:
+        url:
+            base: ${JAMIFY_UAA_BASE_URL}
+            refresh-access-token: ${config.uaa.url.base}/api/v1/auth/refresh-access-token
+        jamify-engine-api-key: ${JAMIFY_ENGINE_API_KEY}

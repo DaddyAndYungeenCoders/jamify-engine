@@ -27,9 +27,10 @@ public class EngineSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/api/**").authenticated()
-                                .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs").permitAll())
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs").permitAll()
+                        .requestMatchers("/api/v1/auth/access-token").permitAll()
+                        .requestMatchers("/api/**").authenticated())
                 .build();
     }
 

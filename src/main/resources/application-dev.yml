@@ -1,3 +1,16 @@
+spring:
+  application:
+    name: engine
+  datasource:
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/engine
+    username: postgres
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${config.uaa.url.base}
+
 security:
   jwt:
     public-key: public.pem
@@ -6,3 +19,9 @@ gateway:
   url: http://localhost:5173
   service:
     front: /mobile-app
+
+config:
+  uaa:
+    url:
+      base: http://localhost:8081
+    jamify-engine-api-key: super-secret-dev-key
