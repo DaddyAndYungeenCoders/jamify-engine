@@ -20,6 +20,12 @@ public class UserEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(name = "user_email")
+    private String email;
+
+    @Column(name = "user_access_token")
+    private String accessToken;
+
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<JamEntity> hostedJams;
 
