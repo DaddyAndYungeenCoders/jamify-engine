@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/access-token")
     public ResponseEntity<Void> saveAccessToken(@RequestHeader(value = "X-API-KEY") String apiKey,
                                                 @RequestBody UserAccessTokenDto userAccessToken) {
-        log.info("Received request to save access token : {} for user: {}", userAccessToken.getAccessToken(), userAccessToken.getEmail());
+        log.info("Received request to save access token : {} for user: {}", userAccessToken.accessToken(), userAccessToken.email());
         if (!apiKey.equals(jamifyEngineApiKey)) {
             throw new InvalidApiKeyException("Invalid API key");
         }

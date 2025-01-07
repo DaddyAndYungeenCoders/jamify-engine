@@ -105,10 +105,10 @@ public class TokenService {
     public void saveAccessToken(UserAccessTokenDto newUserAccessToken) {
         try {
             // check if user already has an access token for the provider
-            UserAccessTokenEntity existingToken = userAccessTokenRepository.findByEmailAndProvider(newUserAccessToken.getEmail(), newUserAccessToken.getProvider());
+            UserAccessTokenEntity existingToken = userAccessTokenRepository.findByEmailAndProvider(newUserAccessToken.email(), newUserAccessToken.provider());
             if (existingToken != null) {
-                existingToken.setAccessToken(newUserAccessToken.getAccessToken());
-                existingToken.setExpiresAt(newUserAccessToken.getExpiresAt());
+                existingToken.setAccessToken(newUserAccessToken.accessToken());
+                existingToken.setExpiresAt(newUserAccessToken.expiresAt());
                 userAccessTokenRepository.save(existingToken);
                 return;
             }
@@ -121,10 +121,10 @@ public class TokenService {
 
     private UserAccessTokenEntity buildUserAccessTokenEntity(UserAccessTokenDto newUserAccessToken) {
         UserAccessTokenEntity newUserAccessTokenEntity = new UserAccessTokenEntity();
-        newUserAccessTokenEntity.setUser(userRepository.findByEmail(newUserAccessToken.getEmail()));
-        newUserAccessTokenEntity.setProvider(newUserAccessToken.getProvider());
-        newUserAccessTokenEntity.setAccessToken(newUserAccessToken.getAccessToken());
-        newUserAccessTokenEntity.setExpiresAt(newUserAccessToken.getExpiresAt());
+        newUserAccessTokenEntity.setUser(userRepository.findByEmail(newUserAccessToken.email()));
+        newUserAccessTokenEntity.setProvider(newUserAccessToken.provider());
+        newUserAccessTokenEntity.setAccessToken(newUserAccessToken.accessToken());
+        newUserAccessTokenEntity.setExpiresAt(newUserAccessToken.expiresAt());
         return newUserAccessTokenEntity;
     }
 }
