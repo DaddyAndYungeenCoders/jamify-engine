@@ -14,8 +14,9 @@ public class UserAccessTokenEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Schema(description = "User email", example = "user@example.com")
-    private String email;
+    @Schema(description = "User details")
+    @OneToOne(fetch = FetchType.LAZY)
+    private UserEntity user;
 
     @Schema(description = "Provider name", example = "spotify")
     private String provider;

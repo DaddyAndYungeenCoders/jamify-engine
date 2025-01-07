@@ -29,7 +29,8 @@ public class EngineSecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs").permitAll()
-                        .requestMatchers("/api/v1/auth/access-token").permitAll()
+                        // these are secured with x-api-key beacause they are endpoint called by the uaa service
+                        .requestMatchers("/api/v1/auth/access-token", "/api/v1/users/uaa/create", "/api/v1/users/uaa/email/**").permitAll()
                         .requestMatchers("/api/**").authenticated())
                 .build();
     }
