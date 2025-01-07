@@ -11,9 +11,9 @@ spring:
     application:
         name: engine
     datasource:
-        password: devpwd
-        url: jdbc:postgresql://localhost:5432/engine
-        username: developer
+        url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+        username: ${POSTGRES_USER}
+        password: ${POSTGRES_PASSWORD}
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
@@ -21,7 +21,7 @@ spring:
         properties:
             hibernate:
                 format_sql: true
-        show-sql: true
+        show-sql: false
     security:
         oauth2:
             resourceserver:

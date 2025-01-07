@@ -38,6 +38,12 @@ public class UserServiceImpl implements UserService {
         if (existingUser != null) {
             // if the provider is different, we update provider's linked fields, and will update access token in next UAA request
             if (!Objects.equals(entityToCreate.provider(), existingUser.getProvider())) {
+                if (entityToCreate.imgUrl() == null) {
+                    existingUser.setImgUrl("https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png");
+                }
+                if (entityToCreate.country() != null) {
+                    existingUser.setCountry(entityToCreate.country());
+                }
                 existingUser.setProvider(entityToCreate.provider());
                 existingUser.setUserProviderId(entityToCreate.userProviderId());
                 userRepository.save(existingUser);

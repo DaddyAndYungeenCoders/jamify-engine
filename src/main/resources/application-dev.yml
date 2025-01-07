@@ -11,6 +11,9 @@ spring:
         jwt:
           issuer-uri: ${config.uaa.url.base}
 
+  jpa:
+    show-sql: true
+
 security:
   jwt:
     public-key: public.pem

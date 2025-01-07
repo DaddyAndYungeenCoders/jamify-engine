@@ -6,10 +6,12 @@ import com.jamify_engine.engine.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jdk.jshell.spi.ExecutionControl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController extends CRUDController<UserDTO, UserService> {
@@ -30,6 +32,7 @@ public class UserController extends CRUDController<UserDTO, UserService> {
             })
     @PostMapping("/uaa/create")
     public UserDTO create(@RequestBody UserDTO entityToCreate, @RequestHeader(value = "X-API-KEY") String apiKey) throws ExecutionControl.NotImplementedException {
+        log.info("[REST] POST /uaa/create - Creating new user");
         if (!apiKey.equals(jamifyEngineApiKey)) {
             throw new InvalidApiKeyException("Invalid API Key");
         }
