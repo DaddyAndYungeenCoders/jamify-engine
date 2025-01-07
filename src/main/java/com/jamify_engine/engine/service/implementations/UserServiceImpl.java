@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -28,13 +29,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO create(UserDTO entityToCreate) throws ExecutionControl.NotImplementedException {
-        log.info("Creating user: {}", entityToCreate);
+        log.info("Creating or updating user: {}", entityToCreate);
         if (entityToCreate.email() == null || entityToCreate.email().isBlank()) {
             throw new BadRequestException("Email cannot be null or empty");
         }
         UserEntity existingUser = userRepository.findByEmail(entityToCreate.email());
 
         if (existingUser != null) {
+            // if the provider is different, we update provider's linked fields, and will update access token in next UAA request
+            if (!Objects.equals(entityToCreate.provider(), existingUser.getProvider())) {
+                existingUser.setProvider(entityToCreate.provider());
+                existingUser.setUserProviderId(entityToCreate.userProviderId());
+                userRepository.save(existingUser);
+            }
             return userMapper.toDTO(existingUser);
         }
         return userMapper.toDTO(userRepository.save(userMapper.toEntity(entityToCreate)));

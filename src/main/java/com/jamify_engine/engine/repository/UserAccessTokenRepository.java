@@ -8,4 +8,6 @@ public interface UserAccessTokenRepository extends JpaRepository<UserAccessToken
 
     @Query("SELECT u FROM user_access_tokens u LEFT JOIN FETCH u.user WHERE u.provider = ?2 AND u.user.email = ?1")
     UserAccessTokenEntity findByEmailAndProvider(String email, String provider);
+
+    UserAccessTokenEntity findByUserEmail(String email);
 }

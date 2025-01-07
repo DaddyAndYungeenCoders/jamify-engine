@@ -1,12 +1,16 @@
-package com.jamify_engine.engine.security;
+package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.security.AccessTokenNotFoundException;
 import com.jamify_engine.engine.exceptions.security.AccessTokenProcessingException;
+import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.ProviderAccessTokenResponse;
 import com.jamify_engine.engine.models.dto.UserAccessTokenDto;
 import com.jamify_engine.engine.models.entities.UserAccessTokenEntity;
+import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.repository.UserAccessTokenRepository;
 import com.jamify_engine.engine.repository.UserRepository;
+import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,14 +19,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Service class for managing user access tokens.
  */
 @Service
-public class TokenService {
+@Transactional
+public class UserAccessTokenServiceImpl implements UserAccessTokenService {
 
-    private static final Logger log = LoggerFactory.getLogger(TokenService.class);
+    private static final Logger log = LoggerFactory.getLogger(UserAccessTokenServiceImpl.class);
     private final UserAccessTokenRepository userAccessTokenRepository;
     private final WebClient uaaWebClient;
     private final UserRepository userRepository;
@@ -33,7 +39,7 @@ public class TokenService {
      * @param userAccessTokenRepository the repository for user access tokens
      * @param uaaWebClient              the WebClient for making HTTP requests
      */
-    public TokenService(UserAccessTokenRepository userAccessTokenRepository, @Qualifier("uaaServiceWebClient") WebClient uaaWebClient, UserRepository userRepository) {
+    public UserAccessTokenServiceImpl(UserAccessTokenRepository userAccessTokenRepository, @Qualifier("uaaServiceWebClient") WebClient uaaWebClient, UserRepository userRepository) {
         this.userAccessTokenRepository = userAccessTokenRepository;
         this.uaaWebClient = uaaWebClient;
         this.userRepository = userRepository;
@@ -102,22 +108,28 @@ public class TokenService {
      * @param newUserAccessToken the user access token entity
      * @throws AccessTokenProcessingException if there is an error while saving the access token
      */
+    @Transactional
     public void saveAccessToken(UserAccessTokenDto newUserAccessToken) {
         try {
-            // check if user already has an access token for the provider
-            UserAccessTokenEntity existingToken = userAccessTokenRepository.findByEmailAndProvider(newUserAccessToken.email(), newUserAccessToken.provider());
+            UserAccessTokenEntity existingToken = userAccessTokenRepository
+                    .findByUserEmail(newUserAccessToken.email());
+
             if (existingToken != null) {
-                existingToken.setAccessToken(newUserAccessToken.accessToken());
-                existingToken.setExpiresAt(newUserAccessToken.expiresAt());
-                userAccessTokenRepository.save(existingToken);
-                return;
+                // Remove the old token from the user
+                UserEntity user = existingToken.getUser();
+                user.setAccessToken(null);
+
+                // Delete the old token
+                userAccessTokenRepository.delete(existingToken);
+                userAccessTokenRepository.flush(); // flush to avoid constraint violation
             }
-            // if not, save the newly created access token
-            userAccessTokenRepository.save(buildUserAccessTokenEntity(newUserAccessToken));
+
+            UserAccessTokenEntity newToken = buildUserAccessTokenEntity(newUserAccessToken);
+            userAccessTokenRepository.save(newToken);
+
         } catch (Exception e) {
             throw new AccessTokenProcessingException("Error while saving access token: " + e.getMessage());
-        }
-    }
+        }    }
 
     private UserAccessTokenEntity buildUserAccessTokenEntity(UserAccessTokenDto newUserAccessToken) {
         UserAccessTokenEntity newUserAccessTokenEntity = new UserAccessTokenEntity();
