@@ -2,10 +2,7 @@ package com.jamify_engine.engine.models.entities;
 
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -15,6 +12,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "jam")
 public class JamEntity {
     @Id
@@ -22,9 +20,12 @@ public class JamEntity {
     @Column(name = "jam_id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "host_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id", insertable = false, updatable = false)
     private UserEntity host;
+
+    @Column(name = "host_id")
+    private Long hostId;
 
     @Column(name = "jam_name")
     private String name;

@@ -1,6 +1,7 @@
 package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
+import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
 import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.UserEntity;
@@ -10,9 +11,12 @@ import com.jamify_engine.engine.service.interfaces.UserService;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,55 +38,89 @@ public class UserServiceImpl implements UserService {
         }
         UserEntity existingUser = userRepository.findByEmail(entityToCreate.email());
 
-        if (existingUser != null) {
-            return userMapper.toDTO(existingUser);
-        }
-        return userMapper.toDTO(userRepository.save(userMapper.toEntity(entityToCreate)));
+        return userMapper.toDTO(Objects.requireNonNullElseGet(existingUser, () -> userRepository.save(userMapper.toEntity(entityToCreate))));
+
     }
 
+    // TODO handle admin authority
+
     @Override
-    public UserDTO update(Long id, UserDTO entityToUpdate) throws ExecutionControl.NotImplementedException {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
+    public UserDTO update(Long id, UserEntity userToUpdate) {
+        getUserFromEmailAndCheckIfCurrentUserIsAllowed(id, userToUpdate.getEmail());
 
-        if (!entityToUpdate.name().isBlank()) {
-            userEntity.setEmail(entityToUpdate.email());
-        }
-        if (!entityToUpdate.name().isBlank()) {
-            userEntity.setName(entityToUpdate.name());
-        }
+        UserEntity updatedUserEntity = userRepository.save(userToUpdate);
 
-        // TODO
-//        Ajouter dans le mapper :     void updateEntityFromDto(UserDTO userDTO, @MappingTarget UserEntity userEntity);
-//        utiliser ici : userMapper.updateEntityFromDto(entityToUpdate, userEntity); -> met a jour les champs non nulls
-
-        UserEntity updatedUserEntity = userRepository.save(userEntity);
         return userMapper.toDTO(updatedUserEntity);
     }
 
     @Override
-    public void delete(Long entityToDeleteId) throws ExecutionControl.NotImplementedException {
+    public UserDTO update(Long id, UserDTO dto) {
+        UserEntity userEntity = getUserFromEmailAndCheckIfCurrentUserIsAllowed(id, dto.email());
+
+        userMapper.updateEntityFromDto(dto, userEntity);
+
+        UserEntity updatedUserEntity = userRepository.save(userEntity);
+
+        return userMapper.toDTO(updatedUserEntity);
+    }
+
+    private UserEntity getUserFromEmailAndCheckIfCurrentUserIsAllowed(Long id, String userToUpdateEmail) {
+        if (id == null) {
+            throw new BadRequestException("Unable to update a user if the entity has no id");
+        }
+
+        UserEntity userCorrespondingToEmail = Optional.ofNullable(userRepository
+                .findByEmail(userToUpdateEmail))
+                .orElseThrow(() ->
+                        new UserNotFoundException("User %s does not exist in database".formatted(userToUpdateEmail))
+                );
+
+        if (!userCorrespondingToEmail.getId().equals(id)) {
+            throw new UnauthorizedException("The id %d and the id of the user you passed are not equals (%d)".formatted(id, userCorrespondingToEmail.getId()));
+        }
+
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        UserEntity currentUser = Optional.ofNullable(userRepository.findByEmail(currentUserEmail))
+                .orElseThrow(() ->
+                        new UserNotFoundException("Current user %s does not exist in database".formatted(currentUserEmail))
+                );
+
+        if (!Objects.equals(currentUser.getId(), userCorrespondingToEmail.getId())) {
+            throw new UnauthorizedException(currentUser.getId());
+        }
+
+        return userCorrespondingToEmail;
+    }
+
+    @Override
+    public void delete(Long entityToDeleteId) {
         userRepository.deleteById(entityToDeleteId);
     }
 
     @Override
-    public UserDTO findById(Long entityId) throws ExecutionControl.NotImplementedException {
+    public UserDTO findById(Long entityId) {
         UserEntity userEntity = userRepository.findById(entityId).orElseThrow(() -> new UserNotFoundException("User with id " + entityId + " not found"));
         return userMapper.toDTO(userEntity);
     }
 
     @Override
-    public List<UserDTO> findAll() throws ExecutionControl.NotImplementedException {
+    public List<UserDTO> findAll() {
         List<UserEntity> userEntities = userRepository.findAll();
         return userMapper.toDTOs(userEntities);
     }
 
     @Override
     public UserDTO findByEmail(String email) {
+        return userMapper.toDTO(findEntityByEmail(email));
+    }
+
+    @Override
+    public UserEntity findEntityByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity == null) {
             throw new UserNotFoundException("User with email " + email + " not found");
         }
 
-        return userMapper.toDTO(userEntity);
+        return userEntity;
     }
 }

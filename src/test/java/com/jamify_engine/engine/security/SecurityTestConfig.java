@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 @TestConfiguration
 public class SecurityTestConfig {
-    // TODO discuss
     @Bean
     public JwtService jwtService() {
         JwtService mockJwtService = mock(JwtService.class);
