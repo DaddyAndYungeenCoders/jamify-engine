@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.exceptions;
 
+import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.security.AccessTokenNotFoundException;
 import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
@@ -24,6 +25,11 @@ public class Translator extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({UserNotFoundException.class})
     public ResponseEntity<Object> handleUserNotFoundException(final Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({BadRequestException.class})
+    public ResponseEntity<Object> handleBadRequestException(final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

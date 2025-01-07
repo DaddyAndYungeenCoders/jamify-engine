@@ -11,7 +11,9 @@ import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.List;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,17 +73,23 @@ public class JwtService {
      * Extracts the roles from the given JWT token.
      *
      * @param token the JWT token
-     * @return the list of roles extracted from the token
+     * @return the set of roles extracted from the token
      */
-    public List<String> getRolesFromToken(String token) {
-        log.info("Getting roles from token: {}", token);
-        return Jwts.parserBuilder()
+    public Set<String> getRolesFromToken(String token) {
+        log.debug("Getting roles from token: {}", token);
+        Set<?> roles = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("roles", List.class);
+                .get("roles", Set.class);
+
+        if (roles != null) {
+            return roles.stream().toList().stream().map(role -> (String) role).collect(Collectors.toSet());
+        }
+        return Collections.emptySet();
     }
+
 
     private RSAPublicKey loadPublicKey(File file) throws Exception {
         log.debug("[DEV] - Loading private key with path {}", file.toPath());

@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.service.implementations;
 
+import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.UserEntity;
@@ -29,7 +30,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO create(UserDTO entityToCreate) throws ExecutionControl.NotImplementedException {
         log.info("Creating user: {}", entityToCreate);
         if (entityToCreate.email() == null || entityToCreate.email().isBlank()) {
-            throw new IllegalArgumentException("Email cannot be null or empty");
+            throw new BadRequestException("Email cannot be null or empty");
         }
         UserEntity existingUser = userRepository.findByEmail(entityToCreate.email());
 
