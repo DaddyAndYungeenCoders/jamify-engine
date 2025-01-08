@@ -17,12 +17,9 @@ import java.util.List;
 @RequestMapping("/api/jams")
 @Slf4j
 public class JamController extends CRUDController<JamDTO, IJamStrategy> {
-    private final IJamStrategy jamStrategy;
-
     @Autowired
     public JamController(IJamStrategy jamStrategy) {
         this.service = jamStrategy;
-        this.jamStrategy = jamStrategy;
     }
 
     /**
@@ -31,7 +28,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @PutMapping("/join/{jamId}")
     void join(@PathVariable("jamId") Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - User Joining jam with id {}", jamId);
-        jamStrategy.joinJam(jamId);
+        service.joinJam(jamId);
     }
 
     /**
@@ -40,7 +37,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @PutMapping("/leave/{jamId}")
     void leave(@PathVariable Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - User Leaving jam with id {}", jamId);
-        jamStrategy.leaveJam(jamId);
+        service.leaveJam(jamId);
     }
 
     /**
@@ -49,7 +46,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @GetMapping("/queue/{jamId}")
     ResponseEntity<List<MusicDTO>> getAllQueuedMusic(@PathVariable final Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - Getting all queued musics in jam with id {}", jamId);
-        return ResponseEntity.ok(jamStrategy.getAllInQueue(jamId));
+        return ResponseEntity.ok(service.getAllInQueue(jamId));
     }
 
     /**
@@ -62,7 +59,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @PostMapping("/play/{musicId}/{jamId}")
     void playMusic(@PathVariable final Long musicId, @PathVariable final Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - Playing the music with id {} for every user in jam with id {}", musicId, jamId);
-        jamStrategy.playMusic(musicId, jamId);
+        service.playMusic(musicId, jamId);
     }
 
     /**
@@ -73,7 +70,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @PostMapping("/launch")
     ResponseEntity<JamDTO> launchAJam(@RequestBody JamInstantLaunching jamVM) {
         log.info("[REST CALL] - launching a jam...");
-        return ResponseEntity.ok(jamStrategy.launchAJam(jamVM));
+        return ResponseEntity.ok(service.launchAJam(jamVM));
     }
 
     /**
@@ -84,7 +81,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     @PostMapping("/stop/{jamId}")
     ResponseEntity<Boolean> stopAJam(@PathVariable Long jamId) {
         log.info("[REST CALL] - launching a jam...");
-        jamStrategy.stopAJam(jamId);
+        service.stopAJam(jamId);
         return ResponseEntity.ok(true);
     }
 }
