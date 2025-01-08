@@ -7,6 +7,7 @@ import com.jamify_engine.engine.models.entities.TagEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import org.mapstruct.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,59 @@ public interface JamMapper {
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
     @Mapping(target = "status", source = "status")
     JamDTO toDTO(JamEntity entity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "host", ignore = true)
+    @Mapping(target = "hostId", source = "hostId")
+    @Mapping(target = "tags", expression = "java(mapThemesToTags(dto.themes()))")
+    @Mapping(target = "participants", expression = "java(mapParticipantIds(dto.participants()))")
+    @Mapping(target = "messages", expression = "java(mapMessageIds(dto.messages()))")
+    @Mapping(source = "scheduledDate", target = "schedStart")
+    JamEntity toEntity(JamDTO dto);
+
+    // TODO use tagsMapperWhenItIsCreated
+    @Named("mapThemesToTags")
+    default Set<TagEntity> mapThemesToTags(Set<String> themes) {
+        if (themes == null) {
+            return new HashSet<>();
+        }
+        return themes.stream()
+                .map(theme -> {
+                    TagEntity tag = new TagEntity();
+                    tag.setLabel(theme);
+                    return tag;
+                })
+                .collect(Collectors.toSet());
+    }
+
+    @Named("mapParticipantIds")
+    default Set<UserEntity> mapParticipantIds(Set<Long> participantIds) {
+        if (participantIds == null) {
+            return new HashSet<>();
+        }
+        return participantIds.stream()
+                .map(id -> {
+                    UserEntity user = new UserEntity();
+                    user.setId(id);
+                    return user;
+                })
+                .collect(Collectors.toSet());
+    }
+
+    // TODO use jammessageMapper when it is created
+    @Named("mapMessageIds")
+    default Set<JamMessageEntity> mapMessageIds(Set<Long> messageIds) {
+        if (messageIds == null) {
+            return new HashSet<>();
+        }
+        return messageIds.stream()
+                .map(id -> {
+                    JamMessageEntity message = new JamMessageEntity();
+                    message.setId(id);
+                    return message;
+                })
+                .collect(Collectors.toSet());
+    }
 
     @Named("mapTagsToThemes")
     default Set<String> mapTagsToThemes(Set<TagEntity> tags) {

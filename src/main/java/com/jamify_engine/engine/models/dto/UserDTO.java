@@ -15,7 +15,9 @@ public record UserDTO(
         String imgUrl,
         String userProviderId,
         Set<String> roles,
-        List<Long> jams
+        List<JamDTO> jams,
+        boolean hasJamRunning
+
         // TODO: Add more fields
 ) implements Serializable {
 }
