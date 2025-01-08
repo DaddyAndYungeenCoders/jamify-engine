@@ -5,6 +5,7 @@ logging:
         hikari: DEBUG
     org:
       springframework: DEBUG
+
 server:
   port: 8082
 spring:

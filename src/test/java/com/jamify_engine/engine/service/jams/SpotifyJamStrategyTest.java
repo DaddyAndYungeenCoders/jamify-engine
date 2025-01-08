@@ -13,24 +13,31 @@ import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
 import com.jamify_engine.engine.service.implementations.SpotifyJamStrategy;
 import com.jamify_engine.engine.service.interfaces.UserService;
-import com.jamify_engine.engine.utils.Constants;
 import com.jamify_engine.engine.utils.TestsUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import static com.jamify_engine.engine.utils.Constants.ACCESS_TOKEN_TEST;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SpotifyJamStrategyTest {
@@ -49,6 +56,8 @@ class SpotifyJamStrategyTest {
     private static final String TEST_EMAIL = "test@test.com";
     private static final Long USER_ID = 1L;
     private static final String TEST_NAME = "Test Jam";
+    private static final JamEntity jamEntity = TestsUtils.buildJamEntity(JamStatusEnum.RUNNING);
+    private static UserEntity userEntityShared = TestsUtils.buildUserEntity();
 
     @BeforeEach
     void setUp() {
@@ -56,6 +65,15 @@ class SpotifyJamStrategyTest {
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(TEST_EMAIL);
+        // To stub the email, see the SecurityTestConfig
+        lenient().when(userService.findEntityByEmail("test@test.com")).thenReturn(userEntityShared);
+        lenient().when(jamRepository.findById(jamEntity.getId())).thenReturn(Optional.of(jamEntity));
+        lenient().when(jamRepository.save(jamEntity)).thenReturn(jamEntity);
+    }
+
+    @AfterEach
+    void teardown() {
+        userEntityShared = TestsUtils.buildUserEntity();
     }
 
     @Test
@@ -65,7 +83,6 @@ class SpotifyJamStrategyTest {
         user.setHasJamRunning(true);
 
         when(userService.findEntityByEmail(TEST_EMAIL)).thenReturn(user);
-        when(userService.findByEmail(TEST_EMAIL)).thenReturn(createUserDTO(user, null));
 
         JamInstantLaunching jamLaunching = JamInstantLaunching.builder()
                 .name(TEST_NAME)
@@ -146,6 +163,52 @@ class SpotifyJamStrategyTest {
         assertThrows(JamNotFoundException.class, () ->
                 spotifyJamStrategy.findRunningJamForUser()
         );
+    }
+
+    @Test
+    @WithMockUser
+    void shouldJoinAJam() {
+        // Given
+        Object principal = ACCESS_TOKEN_TEST;
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, principal);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        JamEntity jam = TestsUtils.buildJamEntity(JamStatusEnum.RUNNING);
+        // When
+        spotifyJamStrategy.joinJam(jam.getId());
+        // Then
+        Assertions.assertNotNull(userEntityShared.getCurrentJam());
+    }
+
+    @Test
+    @WithMockUser
+    void shouldNotBeAbleToJoinAJamIfAlreadyInAnotherRunningOne() {
+        // Given
+        userEntityShared.setCurrentJam(TestsUtils.buildJamEntity(JamStatusEnum.RUNNING));
+        Object principal = ACCESS_TOKEN_TEST;
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, principal);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        JamEntity jam = TestsUtils.buildJamEntity(JamStatusEnum.RUNNING);
+
+        // When & Then
+        Assertions.assertThrows(UnauthorizedException.class, () -> spotifyJamStrategy.joinJam(jam.getId()));
+    }
+
+    @Test
+    @WithMockUser
+    void shouldBeAbleToJoinAJamIfTheUserIsAlreadyInAnotherOneButItIsNotRunning() {
+        // Given
+        userEntityShared.setCurrentJam(TestsUtils.buildJamEntity(JamStatusEnum.STOPPED));
+        Object principal = ACCESS_TOKEN_TEST;
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, principal);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        JamEntity jam = TestsUtils.buildJamEntity(JamStatusEnum.RUNNING);
+        // When
+        spotifyJamStrategy.joinJam(jam.getId());
+        // Then
+        Assertions.assertNotNull(userEntityShared.getCurrentJam());
     }
 
     private UserEntity createTestUser() {
