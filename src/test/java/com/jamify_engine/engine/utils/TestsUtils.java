@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.utils;
 
+import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.PlaylistEntity;
@@ -9,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +32,7 @@ public class TestsUtils {
                 .provider(TEST_PROVIDER)
                 .imgUrl("img.png")
                 .userProviderId("11111111")
-                .jams(null)
+                .jams(new ArrayList<>())
                 .build();
     }
 
