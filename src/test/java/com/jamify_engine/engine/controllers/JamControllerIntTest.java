@@ -3,6 +3,10 @@ package com.jamify_engine.engine.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamify_engine.engine.controllers.jam.JamController;
 import com.jamify_engine.engine.models.dto.MusicDTO;
+import com.jamify_engine.engine.models.entities.JamEntity;
+import com.jamify_engine.engine.models.entities.PlaylistEntity;
+import com.jamify_engine.engine.models.entities.UserEntity;
+import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
 import jdk.jshell.spi.ExecutionControl;
@@ -20,7 +24,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -113,5 +119,45 @@ public class JamControllerIntTest {
 
         // THEN
         verify(mockedJamStrategy).playMusic(eq(TEST_MUSIC_ID), eq(TEST_JAM_ID));
+    }
+
+    @Test
+    @WithMockUser
+    public void shouldLaunchAJam() throws Exception {
+        // GIVEN
+        Set<String> roles = new HashSet<>();
+        roles.add("USER");
+        Set<JamEntity> jams = new HashSet<>();
+        Set<PlaylistEntity> playlistEntities = new HashSet<>();
+        UserEntity mockedUser = new UserEntity(
+                1L,
+                "test.test@test.com",
+                "testName",
+                roles,
+                "france",
+                "spotify",
+                "spotify",
+                "http://image.com",
+                null,
+                false,
+                jams,
+                playlistEntities
+        );
+
+        List<String> themes = new ArrayList<>();
+        themes.add("testTheme");
+        JamInstantLaunching jamVM = JamInstantLaunching.builder().name("chill").themes(themes).build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(jamVM);
+
+        // WHEN
+        mockMvc.perform(post("/api/jams/launch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        // THEN
+        verify(mockedJamStrategy).launchAJam(jamVM);
     }
 }

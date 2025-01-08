@@ -10,9 +10,7 @@ import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,12 +75,13 @@ public class JwtService {
      */
     public Set<String> getRolesFromToken(String token) {
         log.debug("Getting roles from token: {}", token);
-        Set<?> roles = Jwts.parserBuilder()
+        List<?> rolesList = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("roles", Set.class);
+                .get("roles", List.class);
+        Set<?> roles = new HashSet<>(rolesList);
 
         if (roles != null) {
             return roles.stream().toList().stream().map(role -> (String) role).collect(Collectors.toSet());
