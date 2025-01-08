@@ -95,6 +95,10 @@ public abstract class JamStrategy implements IJamStrategy {
 
         JamEntity savedJam = jamRepository.save(jam);
 
+        currentUser.setCurrentJam(null);
+
+        userService.update(currentUser.getId(), currentUser);
+
         notify(savedJam.getHostId(), "User leaving", currentUser.getName());
     }
 
@@ -262,7 +266,7 @@ public abstract class JamStrategy implements IJamStrategy {
     private void checkIfUserIsAllowedToLeaveAJam(UserEntity user, Long jamId) {
         // Refusing if user is in the jam
         if (!(user.getCurrentJam() != null && Objects.equals(user.getCurrentJam().getId(), jamId))) {
-            throw new UnauthorizedException("Unable to join a jam: the user %s is already listening to a jam.".formatted(user.getEmail()));
+            throw new UnauthorizedException("Unable to leave the jam: the user %s is not listening to this jam.".formatted(user.getEmail()));
         }
     }
 

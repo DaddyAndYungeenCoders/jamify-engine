@@ -211,6 +211,37 @@ class SpotifyJamStrategyTest {
         Assertions.assertNotNull(userEntityShared.getCurrentJam());
     }
 
+    @Test
+    @WithMockUser
+    void shouldBeAbleToLeaveAJam() {
+        // Given
+        userEntityShared.setCurrentJam(TestsUtils.buildJamEntity(JamStatusEnum.STOPPED));
+        Object principal = ACCESS_TOKEN_TEST;
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, principal);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        JamEntity jam = TestsUtils.buildJamEntity(JamStatusEnum.RUNNING);
+        // When
+        spotifyJamStrategy.leaveJam(jam.getId());
+        // Then
+        // asserting that the current jam participant field is empty
+        Assertions.assertEquals(jamEntity.getParticipants(), new HashSet<>());
+        Assertions.assertNull(userEntityShared.getCurrentJam());
+    }
+
+    @Test
+    @WithMockUser
+    void shouldNotBeAbleToLeaveAJam() {
+        // Given
+        Object principal = ACCESS_TOKEN_TEST;
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, principal);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        JamEntity jam = TestsUtils.buildJamEntity(JamStatusEnum.RUNNING);
+        // When & Then
+        Assertions.assertThrows(UnauthorizedException.class, () -> spotifyJamStrategy.leaveJam(jam.getId()));
+    }
+
     private UserEntity createTestUser() {
         UserEntity user = new UserEntity();
         user.setId(USER_ID);
