@@ -1,9 +1,14 @@
 package com.jamify_engine.engine.utils;
 
+import com.jamify_engine.engine.models.dto.UserAccessTokenDto;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 import static com.jamify_engine.engine.utils.Constants.TEST_PROVIDER;
 import static com.jamify_engine.engine.utils.Constants.TEST_USER_EMAIL;
@@ -27,4 +32,23 @@ public class TestsUtils {
                 .jams(null)
                 .build();
     }
+
+    public static UserAccessTokenDto buildValidUserAccessTokenDto() {
+        return UserAccessTokenDto.builder()
+                .email(TEST_USER_EMAIL)
+                .provider(TEST_PROVIDER)
+                .accessToken("test")
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .build();
+    }
+
+    public static UserAccessTokenDto buildExpiredUserAccessTokenDto() {
+        return UserAccessTokenDto.builder()
+                .email(TEST_USER_EMAIL)
+                .provider(TEST_PROVIDER)
+                .accessToken("test")
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .build();
+    }
+
 }
