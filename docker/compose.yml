@@ -28,5 +28,5 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       JWK_KEY_ID: jamify-uaa-key-id
-      JAMIFY_UAA_BASE_URL: http://jamify-uaa:8081
+      JAMIFY_UAA_BASE_URL: http://jamify.daddyornot.xyz/jamify-uaa
       JAMIFY_ENGINE_API_KEY: 894daze-daz41eazLwXrrt-55rryrtnbv2-apmqFzf

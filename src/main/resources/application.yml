@@ -33,7 +33,7 @@ security:
         public-key: public.pem
 
 gateway:
-    url: http://localhost:5173
+    url: http://jamify.daddyornot.xyz
     service:
         front: /mobile-app
 
