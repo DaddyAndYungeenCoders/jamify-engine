@@ -9,6 +9,7 @@ import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
+import com.jamify_engine.engine.utils.TestsUtils;
 import jdk.jshell.spi.ExecutionControl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -127,23 +128,7 @@ public class JamControllerIntTest {
         // GIVEN
         Set<String> roles = new HashSet<>();
         roles.add("USER");
-        Set<JamEntity> jams = new HashSet<>();
-        Set<PlaylistEntity> playlistEntities = new HashSet<>();
-        UserEntity mockedUser = new UserEntity(
-                1L,
-                "test.test@test.com",
-                "testName",
-                roles,
-                "france",
-                "spotify",
-                "spotify",
-                "http://image.com",
-                null,
-                false,
-                jams,
-                playlistEntities
-        );
-
+        UserEntity mockedUser = TestsUtils.buildUserEntity();
         List<String> themes = new ArrayList<>();
         themes.add("testTheme");
         JamInstantLaunching jamVM = JamInstantLaunching.builder().name("chill").themes(themes).build();

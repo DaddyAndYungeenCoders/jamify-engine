@@ -5,6 +5,7 @@ import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.PlaylistEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
+import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -53,7 +54,22 @@ public class TestsUtils {
                 null,
                 false,
                 jams,
-                playlists
+                playlists,
+                null
+        );
+    }
+
+    public static JamEntity buildJamEntity(JamStatusEnum jamStatusEnum) {
+        return new JamEntity(
+                1L,
+                buildUserEntity(),
+                1L,
+                JAM_NAME_TEST,
+                LocalDateTime.of(2024, 12, 31, 12, 0),
+                jamStatusEnum,
+                new HashSet<>(),
+                new HashSet<>(),
+                new HashSet<>()
         );
     }
 
