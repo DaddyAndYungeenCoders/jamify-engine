@@ -30,7 +30,7 @@ jobs:
 
   build-and-push:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main || github.ref == 'refs/heads/fix/create'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main || github.ref == 'refs/heads/fix/create')
     runs-on: ubuntu-latest
 
     steps:
