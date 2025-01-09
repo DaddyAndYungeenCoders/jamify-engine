@@ -3,14 +3,14 @@ package com.jamify_engine.engine.exceptions;
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.security.AccessTokenNotFoundException;
+import com.jamify_engine.engine.exceptions.security.InvalidApiKeyException;
+import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
 import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
-import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
@@ -42,6 +42,11 @@ public class Translator extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({UnauthorizedException.class})
     public ResponseEntity<Object> handleUnauthorizedException(final Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({InvalidApiKeyException.class})
+    public ResponseEntity<Object> handleInvalidApiKeyException(final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 }

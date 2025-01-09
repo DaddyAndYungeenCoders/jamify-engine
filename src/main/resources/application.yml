@@ -11,17 +11,17 @@ spring:
     application:
         name: engine
     datasource:
-        password: devpwd
-        url: jdbc:postgresql://localhost:5432/engine
-        username: developer
+        url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+        username: ${POSTGRES_USER}
+        password: ${POSTGRES_PASSWORD}
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
-            ddl-auto: create
+            ddl-auto: update
         properties:
             hibernate:
                 format_sql: true
-        show-sql: true
+        show-sql: false
     security:
         oauth2:
             resourceserver:
@@ -33,7 +33,7 @@ security:
         public-key: public.pem
 
 gateway:
-    url: http://localhost:5173
+    url: http://jamify.daddyornot.xyz
     service:
         front: /mobile-app
 

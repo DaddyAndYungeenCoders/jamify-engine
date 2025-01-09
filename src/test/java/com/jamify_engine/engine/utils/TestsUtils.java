@@ -1,10 +1,9 @@
 package com.jamify_engine.engine.utils;
 
-import com.jamify_engine.engine.models.dto.JamDTO;
+import com.jamify_engine.engine.models.dto.UserAccessTokenDto;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.PlaylistEntity;
-import com.jamify_engine.engine.models.entities.UserAccessTokenEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import jakarta.annotation.PostConstruct;
@@ -32,7 +31,7 @@ public class TestsUtils {
                 .email(TEST_USER_EMAIL)
                 .country(FRANCE_ALPHA_CODE2)
                 .provider(TEST_PROVIDER)
-                .imgUrl("img.png")
+                .imgUrl("http://example.com/img.jpg")
                 .userProviderId("11111111")
                 .jams(new ArrayList<>())
                 .build();
@@ -73,4 +72,23 @@ public class TestsUtils {
                 new HashSet<>()
         );
     }
+
+    public static UserAccessTokenDto buildValidUserAccessTokenDto() {
+        return UserAccessTokenDto.builder()
+                .email(TEST_USER_EMAIL)
+                .provider(TEST_PROVIDER)
+                .accessToken("test")
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .build();
+    }
+
+    public static UserAccessTokenDto buildExpiredUserAccessTokenDto() {
+        return UserAccessTokenDto.builder()
+                .email(TEST_USER_EMAIL)
+                .provider(TEST_PROVIDER)
+                .accessToken("test")
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .build();
+    }
+
 }

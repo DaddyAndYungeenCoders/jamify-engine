@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -32,17 +33,32 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO create(UserDTO entityToCreate) throws ExecutionControl.NotImplementedException {
-        log.info("Creating user: {}", entityToCreate);
+        log.info("Creating or updating user: {}", entityToCreate);
         if (entityToCreate.email() == null || entityToCreate.email().isBlank()) {
             throw new BadRequestException("Email cannot be null or empty");
         }
         UserEntity existingUser = userRepository.findByEmail(entityToCreate.email());
 
-        return userMapper.toDTO(Objects.requireNonNullElseGet(existingUser, () -> userRepository.save(userMapper.toEntity(entityToCreate))));
-
+        if (existingUser != null) {
+            // if the provider is different, we update provider's linked fields, and will update access token in next UAA request
+            this.update(existingUser.getId(), entityToCreate);
+            if (!Objects.equals(entityToCreate.provider(), existingUser.getProvider())) {
+                if (entityToCreate.imgUrl() == null) {
+                    existingUser.setImgUrl("https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png");
+                } else {
+                    existingUser.setImgUrl(entityToCreate.imgUrl());
+                }
+                if (entityToCreate.country() != null) {
+                    existingUser.setCountry(entityToCreate.country());
+                }
+                existingUser.setProvider(entityToCreate.provider());
+                existingUser.setUserProviderId(entityToCreate.userProviderId());
+                userRepository.save(existingUser);
+            }
+            return userMapper.toDTO(existingUser);
+        }
+        return userMapper.toDTO(userRepository.save(userMapper.toEntity(entityToCreate)));
     }
-
-    // TODO handle admin authority
 
     @Override
     public UserDTO update(Long id, UserEntity userToUpdate) {
