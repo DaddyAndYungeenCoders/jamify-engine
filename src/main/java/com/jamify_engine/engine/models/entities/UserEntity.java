@@ -56,6 +56,10 @@ public class UserEntity {
     @OneToMany(mappedBy = "author")
     private Set<PlaylistEntity> playlists;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jam_id")
+    private JamEntity currentJam;
+
 /* FIXME remove comments and create badge entity (com.jamify_engine.engine.models.entities.BadgeEntity)
     @ManyToMany
     @JoinTable(
