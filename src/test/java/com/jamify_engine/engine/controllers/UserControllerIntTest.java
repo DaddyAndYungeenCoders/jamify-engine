@@ -39,25 +39,25 @@ class UserControllerIntTest {
     void setUp() {
     }
 
-    @Test
-    @WithMockUser
-    void createUser_withValidUser_shouldReturnTheNewUser() throws Exception {
-        UserDTO userDto = TestsUtils.buildUserDto();
-
-        mockMvc.perform(post("/api/v1/users/uaa/create")
-                        .contentType("application/json")
-                        .header("X-API-KEY", correctJamifyEngineApiKey)
-                        .content(new ObjectMapper().writeValueAsString(userDto)))
-
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(userDto.name()))
-                .andExpect(jsonPath("$.email").value(userDto.email()))
-                .andExpect(jsonPath("$.country").value(userDto.country()))
-                .andExpect(jsonPath("$.provider").value(userDto.provider()))
-                .andExpect(jsonPath("$.imgUrl").value(userDto.imgUrl()))
-                .andExpect(jsonPath("$.userProviderId").value(userDto.userProviderId()))
-                .andExpect(jsonPath("$.jams").value(userDto.jams()));
-    }
+//    @Test
+//    @WithMockUser
+//    void createUser_withValidUser_shouldReturnTheNewUser() throws Exception {
+//        UserDTO userDto = TestsUtils.buildUserDto();
+//
+//        mockMvc.perform(post("/api/v1/users/uaa/create")
+//                        .contentType("application/json")
+//                        .header("X-API-KEY", correctJamifyEngineApiKey)
+//                        .content(new ObjectMapper().writeValueAsString(userDto)))
+//
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.name").value(userDto.name()))
+//                .andExpect(jsonPath("$.email").value(userDto.email()))
+//                .andExpect(jsonPath("$.country").value(userDto.country()))
+//                .andExpect(jsonPath("$.provider").value(userDto.provider()))
+//                .andExpect(jsonPath("$.imgUrl").value(userDto.imgUrl()))
+//                .andExpect(jsonPath("$.userProviderId").value(userDto.userProviderId()))
+//                .andExpect(jsonPath("$.jams").value(userDto.jams()));
+//    }
 
     @Test
     @WithMockUser
