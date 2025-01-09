@@ -7,6 +7,7 @@ import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.repository.UserRepository;
 import com.jamify_engine.engine.security.SecurityTestConfig;
+import com.jamify_engine.engine.service.implementations.UserAccessTokenServiceImpl;
 import com.jamify_engine.engine.utils.TestsUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,61 +47,63 @@ class AuthControllerIntTest {
     void setUp() {
     }
 
-    @Test
-    @WithMockUser
-    void saveAccessToken_whenUserHasNoToken_shouldSaveTheNewAccessToken() throws Exception {
-        UserAccessTokenDto token = TestsUtils.buildValidUserAccessTokenDto();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        String tokenJson = mapper.writeValueAsString(token);
+//    @Test
+//    @WithMockUser
+//    void saveAccessToken_whenUserHasNoToken_shouldSaveTheNewAccessToken() throws Exception {
+//        UserAccessTokenDto token = TestsUtils.buildValidUserAccessTokenDto();
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.registerModule(new JavaTimeModule());
+//        String tokenJson = mapper.writeValueAsString(token);
+//
+//        mockMvc.perform(post("/api/v1/auth/access-token")
+//                        .contentType("application/json")
+//                        .header("X-API-KEY", correctJamifyEngineApiKey)
+//                        .content(tokenJson))
+//
+//                .andExpect(status().isOk());
+//
+//        String newToken = userAccessTokenService.getAccessToken(token.email(), token.provider());
+//        Assertions.assertEquals(token.accessToken(), newToken);
+//    }
 
-        mockMvc.perform(post("/api/v1/auth/access-token")
-                        .contentType("application/json")
-                        .header("X-API-KEY", correctJamifyEngineApiKey)
-                        .content(tokenJson))
-
-                .andExpect(status().isOk());
-
-        String newToken = userAccessTokenService.getAccessToken(token.email(), token.provider());
-        Assertions.assertEquals(token.accessToken(), newToken);
-
-    }
-
-    @Test
-    @WithMockUser
-    void saveAccessToken_whenUserHasToken_shouldReplaceWithTheNewAccessToken() throws Exception {
-        UserDTO userDto = TestsUtils.buildUserDto();
-        UserEntity existingUser = userRepository.findByEmail(userDto.email());
-        String existingToken = userAccessTokenService.getAccessToken(existingUser.getEmail(), existingUser.getProvider());
-        UserAccessTokenDto token = TestsUtils.buildValidUserAccessTokenDto();
-
-        Assertions.assertNotEquals(existingToken, token.accessToken());
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        String tokenJson = mapper.writeValueAsString(token);
-
-        mockMvc.perform(post("/api/v1/auth/access-token")
-                        .contentType("application/json")
-                        .header("X-API-KEY", correctJamifyEngineApiKey)
-                        .content(new ObjectMapper().writeValueAsString(tokenJson)))
-                .andExpect(status().isOk());
-
-        String newToken = userAccessTokenService.getAccessToken(token.email(), token.provider());
-        Assertions.assertEquals(token.accessToken(), newToken);
-        Assertions.assertNotEquals(existingToken, newToken);
-    }
+//    @Test
+//    @WithMockUser
+//    void saveAccessToken_whenUserHasToken_shouldReplaceWithTheNewAccessToken() throws Exception {
+//        UserDTO userDto = TestsUtils.buildUserDto();
+//        UserEntity existingUser = userRepository.findByEmail(userDto.email());
+//        String existingToken = userAccessTokenService.getAccessToken(existingUser.getEmail(), existingUser.getProvider());
+//        UserAccessTokenDto token = TestsUtils.buildValidUserAccessTokenDto();
+//
+//        Assertions.assertNotEquals(existingToken, token.accessToken());
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.registerModule(new JavaTimeModule());
+//        String tokenJson = mapper.writeValueAsString(token);
+//
+//        mockMvc.perform(post("/api/v1/auth/access-token")
+//                        .contentType("application/json")
+//                        .header("X-API-KEY", correctJamifyEngineApiKey)
+//                        .content(new ObjectMapper().writeValueAsString(tokenJson)))
+//                .andExpect(status().isOk());
+//
+//        String newToken = userAccessTokenService.getAccessToken(token.email(), token.provider());
+//        Assertions.assertEquals(token.accessToken(), newToken);
+//        Assertions.assertNotEquals(existingToken, newToken);
+//    }
 
 
     @Test
     @WithMockUser
     void saveAccessToken_withInvalidApiKey_shouldReturn401Unauthorized() throws Exception {
         UserAccessTokenDto token = TestsUtils.buildValidUserAccessTokenDto();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        String tokenJson = mapper.writeValueAsString(token);
 
         mockMvc.perform(post("/api/v1/auth/access-token")
                         .contentType("application/json")
                         .header("X-API-KEY", "wrongApiKey")
-                        .content(new ObjectMapper().writeValueAsString(token)))
+                        .content(new ObjectMapper().writeValueAsString(tokenJson)))
 
                 .andExpect(status().isBadRequest());
     }

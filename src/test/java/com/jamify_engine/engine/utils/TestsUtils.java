@@ -31,7 +31,7 @@ public class TestsUtils {
                 .email(TEST_USER_EMAIL)
                 .country(FRANCE_ALPHA_CODE2)
                 .provider(TEST_PROVIDER)
-                .imgUrl("img.png")
+                .imgUrl("http://example.com/img.jpg")
                 .userProviderId("11111111")
                 .jams(new ArrayList<>())
                 .build();
