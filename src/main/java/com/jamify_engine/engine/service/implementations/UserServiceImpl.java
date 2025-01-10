@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -32,46 +31,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO create(UserDTO entityToCreate) throws ExecutionControl.NotImplementedException {
-        log.info("Creating or updating user: {}", entityToCreate);
-        if (entityToCreate.email() == null || entityToCreate.email().isBlank()) {
+    public UserDTO create(UserDTO userDtoToCreate) throws ExecutionControl.NotImplementedException {
+        log.info("Creating or updating user: {}", userDtoToCreate);
+        if (userDtoToCreate.email() == null || userDtoToCreate.email().isBlank()) {
             throw new BadRequestException("Email cannot be null or empty");
         }
-        UserEntity existingUser = userRepository.findByEmail(entityToCreate.email());
+        UserEntity existingUser = userRepository.findByEmail(userDtoToCreate.email());
 
         if (existingUser != null) {
             // if the provider is different, we update provider's linked fields, and will update access token in next UAA request
-            this.update(existingUser.getId(), entityToCreate);
-            if (!Objects.equals(entityToCreate.provider(), existingUser.getProvider())) {
-                if (entityToCreate.imgUrl() == null) {
+
+            this.updateFromRegisteringOrLoggingIn(existingUser.getId(), userDtoToCreate);
+            if (!Objects.equals(userDtoToCreate.provider(), existingUser.getProvider())) {
+                if (userDtoToCreate.imgUrl() == null) {
                     existingUser.setImgUrl("https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png");
                 } else {
-                    existingUser.setImgUrl(entityToCreate.imgUrl());
+                    existingUser.setImgUrl(userDtoToCreate.imgUrl());
                 }
-                if (entityToCreate.country() != null) {
-                    existingUser.setCountry(entityToCreate.country());
-                }
-                existingUser.setProvider(entityToCreate.provider());
-                existingUser.setUserProviderId(entityToCreate.userProviderId());
+                existingUser.setProvider(userDtoToCreate.provider());
+                existingUser.setUserProviderId(userDtoToCreate.userProviderId());
                 userRepository.save(existingUser);
             }
             return userMapper.toDTO(existingUser);
         }
-        return userMapper.toDTO(userRepository.save(userMapper.toEntity(entityToCreate)));
+        return userMapper.toDTO(userRepository.save(userMapper.toEntity(userDtoToCreate)));
     }
 
     @Override
-    public UserDTO update(Long id, UserEntity userToUpdate) {
-        getUserFromEmailAndCheckIfCurrentUserIsAllowed(id, userToUpdate.getEmail());
-
-        UserEntity updatedUserEntity = userRepository.save(userToUpdate);
-
-        return userMapper.toDTO(updatedUserEntity);
-    }
-
-    @Override
-    public UserDTO update(Long id, UserDTO dto) {
-        UserEntity userEntity = getUserFromEmailAndCheckIfCurrentUserIsAllowed(id, dto.email());
+    public UserDTO updateFromRegisteringOrLoggingIn(Long id, UserDTO dto) {
+        UserEntity userEntity = getUserFromEmail(id, dto.email());
 
         userMapper.updateEntityFromDto(dto, userEntity);
 
@@ -80,9 +68,34 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDTO(updatedUserEntity);
     }
 
-    private UserEntity getUserFromEmailAndCheckIfCurrentUserIsAllowed(Long id, String userToUpdateEmail) {
+    @Override
+    public UserDTO update(Long id, UserEntity userToUpdate) {
+        UserEntity user = getUserFromEmail(id, userToUpdate.getEmail());
+        UserEntity allowedUserToUpdate = isCurrentUserAllowed(user);
+
+        UserEntity updatedUserEntity = userRepository.save(allowedUserToUpdate);
+
+        return userMapper.toDTO(updatedUserEntity);
+    }
+
+    @Override
+    public UserDTO update(Long id, UserDTO dto) {
+        UserEntity user = getUserFromEmail(id, dto.email());
+        UserEntity allowedUserToUpdate = isCurrentUserAllowed(user);
+
+        userMapper.updateEntityFromDto(dto, allowedUserToUpdate);
+
+        UserEntity updatedUserEntity = userRepository.save(allowedUserToUpdate);
+
+        return userMapper.toDTO(updatedUserEntity);
+    }
+
+    private UserEntity getUserFromEmail(Long id, String userToUpdateEmail) {
         if (id == null) {
             throw new BadRequestException("Unable to update a user if the entity has no id");
+        }
+        if (userToUpdateEmail == null || userToUpdateEmail.isBlank()) {
+            throw new BadRequestException("Email cannot be null or empty");
         }
 
         UserEntity userCorrespondingToEmail = Optional.ofNullable(userRepository
@@ -94,6 +107,11 @@ public class UserServiceImpl implements UserService {
         if (!userCorrespondingToEmail.getId().equals(id)) {
             throw new UnauthorizedException("The id %d and the id of the user you passed are not equals (%d)".formatted(id, userCorrespondingToEmail.getId()));
         }
+
+        return userCorrespondingToEmail;
+    }
+
+    private UserEntity isCurrentUserAllowed(UserEntity userCorrespondingToEmail) {
 
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         UserEntity currentUser = Optional.ofNullable(userRepository.findByEmail(currentUserEmail))

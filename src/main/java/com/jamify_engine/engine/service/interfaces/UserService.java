@@ -11,5 +11,7 @@ public interface UserService extends ServiceBasics<UserDTO> {
 
     UserDTO update(Long id, UserDTO user);
 
+    UserDTO updateFromRegisteringOrLoggingIn(Long id, UserDTO dto);
+
     UserDTO update(Long id, UserEntity user);
 }
