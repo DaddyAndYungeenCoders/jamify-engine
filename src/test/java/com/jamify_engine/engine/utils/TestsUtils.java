@@ -11,18 +11,58 @@ import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.jamify_engine.engine.utils.Constants.*;
 
 @Slf4j
 @Component
 public class TestsUtils {
+
+    public static Authentication mockAuthenticationTrue() {
+        return new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return TEST_USER_EMAIL;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return true;
+            }
+
+            @Override
+            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return TEST_USER_EMAIL;
+            }
+        };
+    }
 
     @PostConstruct
     public void init() {
@@ -100,7 +140,7 @@ public class TestsUtils {
         EventCreateDTO eventCreateDTO = new EventCreateDTO();
         eventCreateDTO.setName("Test Event");
         eventCreateDTO.setAddress(buildAddress());
-        eventCreateDTO.setScheduledStart(LocalDateTime.of(2024, 12, 31, 12, 0));
+        eventCreateDTO.setScheduledStart(LocalDateTime.now().plusDays(1));
         return eventCreateDTO;
     }
 

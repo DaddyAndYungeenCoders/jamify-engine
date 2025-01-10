@@ -3,8 +3,7 @@ name: Java CI with Maven
 on:
   push:
     branches:
-      - main
-      - 'fix/**'
+      - '*'
   pull_request:
     branches:
       - main
@@ -34,6 +33,7 @@ jobs:
   build-and-push:
     needs: build
     runs-on: ubuntu-latest
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/main'"
 
     steps:
       - uses: actions/checkout@v3
