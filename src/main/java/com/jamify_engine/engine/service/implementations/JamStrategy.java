@@ -169,8 +169,9 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     @Override
-    public JamDTO findById(Long entityId) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("not yet");
+    public JamDTO findById(Long entityId) {
+        JamEntity jam = jamRepository.findById(entityId).orElseThrow(() -> new JamNotFoundException("The jam with id %d was not found"));
+        return mapper.toDTO(jam);
     }
 
     @Override
