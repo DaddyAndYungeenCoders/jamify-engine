@@ -40,10 +40,7 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     public EventDTO createHostedEvent(EventCreateDTO eventDTO) {
-        // get current logged in user
-        Object email = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserEntity hostEntity = userService.findEntityByEmail(email.toString());
-
+        UserEntity hostEntity = getCurrentUser();
 
         EventEntity eventToCreate = eventMapper.toEntityfromCreateDTO(eventDTO);
         eventToCreate.setParticipants(new HashSet<>());
@@ -58,6 +55,35 @@ public class EventServiceImpl implements EventService {
     @Override
     public Set<EventEntity> findAllByHostId(long hostId) {
         return eventRepository.findAllByHostId(hostId);
+    }
+
+    @Override
+    @Transactional
+    public EventDTO joinEvent(Long eventId) {
+        UserEntity userEntity = getCurrentUser();
+        EventEntity eventEntity = eventRepository.findById(eventId)
+                .orElseThrow(() -> new BadRequestException("Event with id " + eventId + " not found."));
+
+        validateJoiningEvent(userEntity, eventEntity);
+
+        eventEntity.getParticipants().add(userEntity);
+        eventRepository.save(eventEntity);
+
+        return eventMapper.toDTO(eventEntity);
+    }
+
+    private void validateJoiningEvent(UserEntity userEntity, EventEntity eventEntity) {
+        if (eventEntity.getStatus() == EventStatus.FINISHED) {
+            throw new BadRequestException("Event has already finished.");
+        }
+
+        if (eventEntity.getStatus() == EventStatus.CANCELLED) {
+            throw new BadRequestException("Event has been cancelled.");
+        }
+
+        if (eventEntity.getParticipants().contains(userEntity)) {
+            throw new BadRequestException("User is already a participant of this event.");
+        }
     }
 
 
@@ -95,5 +121,10 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(eventMapper::toDTO)
                 .toList();
+    }
+
+    private UserEntity getCurrentUser() {
+        Object email = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userService.findEntityByEmail(email.toString());
     }
 }

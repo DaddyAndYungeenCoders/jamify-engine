@@ -11,4 +11,6 @@ public interface EventService extends ServiceBasics<EventDTO> {
     EventDTO createHostedEvent(EventCreateDTO eventDTO);
 
     Set<EventEntity> findAllByHostId(long hostId);
+
+    EventDTO joinEvent(Long eventId);
 }

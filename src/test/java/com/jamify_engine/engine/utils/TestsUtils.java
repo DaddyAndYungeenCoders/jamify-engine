@@ -1,7 +1,6 @@
 package com.jamify_engine.engine.utils;
 
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
-import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.models.dto.UserAccessTokenDto;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.AddressType;
@@ -25,7 +24,7 @@ import static com.jamify_engine.engine.utils.Constants.*;
 @Component
 public class TestsUtils {
 
-    public static Authentication mockAuthenticationTrue() {
+    public static Authentication mocktestUser1Authenticated() {
         return new Authentication() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -60,6 +59,45 @@ public class TestsUtils {
             @Override
             public String getName() {
                 return TEST_USER_EMAIL;
+            }
+        };
+    }
+
+    public static Authentication mocktestUser2Authenticated() {
+        return new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return TEST_USER_EMAIL_2;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return true;
+            }
+
+            @Override
+            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return TEST_USER_EMAIL_2;
             }
         };
     }
@@ -138,7 +176,7 @@ public class TestsUtils {
 
     public static EventCreateDTO buildEventCreateDto() {
         EventCreateDTO eventCreateDTO = new EventCreateDTO();
-        eventCreateDTO.setName("Test Event");
+        eventCreateDTO.setName("New Test Event");
         eventCreateDTO.setAddress(buildAddress());
         eventCreateDTO.setScheduledStart(LocalDateTime.now().plusDays(1));
         return eventCreateDTO;

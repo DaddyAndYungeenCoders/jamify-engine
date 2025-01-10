@@ -9,10 +9,7 @@ import jakarta.validation.Valid;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -28,11 +25,24 @@ public class EventController extends CRUDController<EventDTO, EventService> {
             description = "Create a new hosted event in the Jamify Engine.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Hosted event created successfully."),
+                    @ApiResponse(responseCode = "400", description = "Invalid event data."),
             })
     @PostMapping("/createHostedEvent")
     public EventDTO create(@Valid @RequestBody EventCreateDTO eventDTO) {
         log.info("[REST] POST /createHostedEvent - Creating new hosted event");
         return service.createHostedEvent(eventDTO);
+    }
+
+    @Operation(summary = "Join an event",
+            description = "Join an SCHEDULED or RUNNING event in the Jamify Engine.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Event joined successfully."),
+                    @ApiResponse(responseCode = "400", description = "Event is not joinable."),
+            })
+    @PostMapping("/join/{eventId}")
+    public EventDTO joinEvent(@PathVariable Long eventId) {
+        log.info("[REST] POST /join/{eventId} - Joining event with id: {}", eventId);
+        return service.joinEvent(eventId);
     }
 
 }
