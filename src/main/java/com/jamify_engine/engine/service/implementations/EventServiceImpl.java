@@ -1,8 +1,10 @@
 package com.jamify_engine.engine.service.implementations;
 
+import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
+import com.jamify_engine.engine.models.entities.AddressType;
 import com.jamify_engine.engine.models.entities.EventEntity;
 import com.jamify_engine.engine.models.entities.EventStatus;
 import com.jamify_engine.engine.models.entities.UserEntity;
@@ -16,8 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.chrono.ChronoLocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -35,13 +41,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDTO createHostedEvent(EventCreateDTO eventDTO) {
         // get current logged in user
-        // TODO
         Object email = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity hostEntity = userService.findEntityByEmail(email.toString());
 
-        if (hostEntity == null) {
-            throw new UserNotFoundException("User with id " + email + " not found");
-        }
 
         EventEntity eventToCreate = eventMapper.toEntityfromCreateDTO(eventDTO);
         eventToCreate.setParticipants(new HashSet<>());
@@ -51,6 +53,11 @@ public class EventServiceImpl implements EventService {
         eventToCreate.getParticipants().add(hostEntity);
 
         return eventMapper.toDTO(eventRepository.save(eventToCreate));
+    }
+
+    @Override
+    public Set<EventEntity> findAllByHostId(long hostId) {
+        return eventRepository.findAllByHostId(hostId);
     }
 
 

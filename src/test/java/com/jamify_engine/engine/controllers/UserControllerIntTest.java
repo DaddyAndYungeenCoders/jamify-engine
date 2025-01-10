@@ -10,6 +10,7 @@ import com.jamify_engine.engine.service.interfaces.UserService;
 import com.jamify_engine.engine.utils.TestsUtils;
 import org.h2.engine.User;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -18,11 +19,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collection;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,6 +52,12 @@ class UserControllerIntTest {
     @Autowired
     private UserService userService;
 
+    @BeforeAll
+    static void setUpAll() {
+        // mock authenticated with test-user@example.com
+        SecurityContextHolder.getContext().setAuthentication(TestsUtils.mockAuthenticationTrue());
+    }
+
 
     @BeforeEach
     void setUp() {
@@ -54,7 +67,6 @@ class UserControllerIntTest {
 //    @WithMockUser
     void createUser_withValidUser_shouldReturnTheNewUser() throws Exception {
         UserDTO userDto = TestsUtils.buildUserDto();
-
         mockMvc.perform(post("/api/v1/users/uaa/create")
                         .contentType("application/json")
                         .header("X-API-KEY", correctJamifyEngineApiKey)
@@ -71,7 +83,6 @@ class UserControllerIntTest {
     }
 
     @Test
-//    @WithMockUser
     void createUser_withValidUserAndNewProvider_shouldReturnTheUpdatedNewUser() throws Exception {
         UserDTO userDto = TestsUtils.buildUserDto();
 

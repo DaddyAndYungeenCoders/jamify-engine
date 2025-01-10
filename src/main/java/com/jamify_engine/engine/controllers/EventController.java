@@ -5,6 +5,7 @@ import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.service.interfaces.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class EventController extends CRUDController<EventDTO, EventService> {
                     @ApiResponse(responseCode = "200", description = "Hosted event created successfully."),
             })
     @PostMapping("/createHostedEvent")
-    public EventDTO create(@RequestBody EventCreateDTO eventDTO) {
+    public EventDTO create(@Valid @RequestBody EventCreateDTO eventDTO) {
         log.info("[REST] POST /createHostedEvent - Creating new hosted event");
         return service.createHostedEvent(eventDTO);
     }

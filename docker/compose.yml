@@ -14,19 +14,19 @@ services:
     ports:
       - "5432:5432"
 
-  jamify-engine:
-    container_name: jamify-engine
-    build:
-      context: ../
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
-    environment:
-      POSTGRES_HOST: postgres-engine
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: engine
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      JWK_KEY_ID: jamify-uaa-key-id
-      JAMIFY_UAA_BASE_URL: http://jamify.daddyornot.xyz/jamify-uaa
-      JAMIFY_ENGINE_API_KEY: 894daze-daz41eazLwXrrt-55rryrtnbv2-apmqFzf
+#  jamify-engine:
+#    container_name: jamify-engine
+#    build:
+#      context: ../
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8082:8082"
+#    environment:
+#      POSTGRES_HOST: postgres-engine
+#      POSTGRES_PORT: 5432
+#      POSTGRES_DB: engine
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#      JWK_KEY_ID: jamify-uaa-key-id
+#      JAMIFY_UAA_BASE_URL: http://jamify.daddyornot.xyz/jamify-uaa
+#      JAMIFY_ENGINE_API_KEY: 894daze-daz41eazLwXrrt-55rryrtnbv2-apmqFzf
