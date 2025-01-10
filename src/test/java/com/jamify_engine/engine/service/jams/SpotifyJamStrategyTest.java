@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.service.jams;
 
+import com.jamify_engine.engine.config.webClient.SpotifyWebClient;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
@@ -9,9 +10,12 @@ import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
+import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
 import com.jamify_engine.engine.service.implementations.SpotifyJamStrategy;
+import com.jamify_engine.engine.service.interfaces.MusicService;
+import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
 import com.jamify_engine.engine.service.interfaces.UserService;
 import com.jamify_engine.engine.utils.TestsUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -27,6 +31,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -51,6 +56,14 @@ class SpotifyJamStrategyTest {
     private SecurityContext securityContext;
     @Mock
     private Authentication authentication;
+    @Mock
+    private WebClient spotifyWebClient;
+    @Mock
+    UserAccessTokenService userAccessTokenService;
+    @Mock
+    private MusicService musicService;
+    @Mock
+    private MusicMapper musicMapper;
 
     private SpotifyJamStrategy spotifyJamStrategy;
     private static final String TEST_EMAIL = "test@test.com";
@@ -61,7 +74,7 @@ class SpotifyJamStrategyTest {
 
     @BeforeEach
     void setUp() {
-        spotifyJamStrategy = new SpotifyJamStrategy(userService, jamRepository, jamMapper);
+        spotifyJamStrategy = new SpotifyJamStrategy(userService, jamRepository, jamMapper, musicService, musicMapper, spotifyWebClient, userAccessTokenService);
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(TEST_EMAIL);

@@ -2,6 +2,7 @@ package com.jamify_engine.engine.exceptions;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
+import com.jamify_engine.engine.exceptions.musics.MusicNotFoundException;
 import com.jamify_engine.engine.exceptions.security.AccessTokenNotFoundException;
 import com.jamify_engine.engine.exceptions.security.InvalidApiKeyException;
 import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
@@ -48,5 +49,10 @@ public class Translator extends ResponseEntityExceptionHandler {
     @ExceptionHandler({InvalidApiKeyException.class})
     public ResponseEntity<Object> handleInvalidApiKeyException(final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({MusicNotFoundException.class})
+    public ResponseEntity<Object> handleMusicNotFound(final Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

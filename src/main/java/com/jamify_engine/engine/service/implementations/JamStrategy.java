@@ -12,9 +12,11 @@ import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
+import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
+import com.jamify_engine.engine.service.interfaces.MusicService;
 import com.jamify_engine.engine.service.interfaces.UserService;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
@@ -29,16 +31,35 @@ import java.util.*;
 @RequiredArgsConstructor
 public abstract class JamStrategy implements IJamStrategy {
     @Autowired
-    private final UserService userService;
+    protected final UserService userService;
 
     @Autowired
-    private final JamRepository jamRepository;
+    protected final JamRepository jamRepository;
 
-    private final JamMapper mapper;
+    protected final JamMapper mapper;
+
+    @Autowired
+    protected final MusicService musicService;
+
+    protected final MusicMapper musicMapper;
 
     @Override
     public void playMusic(Long musicId, Long jamId) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("not yet");
+        JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam with id %d could not be found".formatted(jamId)));
+        Long currentUserId = getCurrentUser().getId();
+
+        if (!Objects.equals(jam.getHost().getId(), currentUserId)) {
+            throw new UnauthorizedException(currentUserId);
+        }
+
+        MusicDTO music = musicService.findById(musicId);
+        JamDTO jamDTO = mapper.toDTO(jam);
+
+        if (music == null || jamDTO == null) {
+            throw new InternalError();
+        }
+
+        specificPlay(music, jamDTO);
     }
 
     @Override
@@ -217,12 +238,12 @@ public abstract class JamStrategy implements IJamStrategy {
         );
     }
 
-    private UserEntity getCurrentUser() {
+    protected UserEntity getCurrentUser() {
         String currentUserEmail = getCurrentUserEmail();
         return userService.findEntityByEmail(currentUserEmail);
     }
 
-    private UserDTO updateUserWithNewJam(UserEntity user, JamEntity jam) {
+    protected UserDTO updateUserWithNewJam(UserEntity user, JamEntity jam) {
         Set<JamEntity> hostedJams = user.getHostedJams();
 
         hostedJams.add(jam);
@@ -233,12 +254,12 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
 
-    private String getCurrentUserEmail() {
+    protected String getCurrentUserEmail() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return principal.toString();
     }
 
-    private UserEntity getUserAndCheckIfUserIsAllowedToLaunchAJam() {
+    protected UserEntity getUserAndCheckIfUserIsAllowedToLaunchAJam() {
         UserEntity user = getCurrentUser();
 
         if (Objects.equals(user, null)) {
@@ -252,7 +273,7 @@ public abstract class JamStrategy implements IJamStrategy {
         return user;
     }
 
-    private void checkIfUserIsAllowedToJoinAJam(UserEntity user) {
+    protected void checkIfUserIsAllowedToJoinAJam(UserEntity user) {
         // Refusing if user is hosting a jam
         if (user.isHasJamRunning()) {
             throw new UnauthorizedException("Unable to join a jam: the user %s is already hosting a jam.".formatted(user.getEmail()));
@@ -263,7 +284,7 @@ public abstract class JamStrategy implements IJamStrategy {
         }
     }
 
-    private void checkIfUserIsAllowedToLeaveAJam(UserEntity user, Long jamId) {
+    protected void checkIfUserIsAllowedToLeaveAJam(UserEntity user, Long jamId) {
         // Refusing if user is in the jam
         if (!(user.getCurrentJam() != null && Objects.equals(user.getCurrentJam().getId(), jamId))) {
             throw new UnauthorizedException("Unable to leave the jam: the user %s is not listening to this jam.".formatted(user.getEmail()));
@@ -271,9 +292,13 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     //TODO handle with StreamListeners, set type to an enum, call a notification service
-    private void notify(Long userId, String type, String message) {
+    protected void notify(Long userId, String type, String message) {
         log.debug("Notifying the user %d about %s, notification type: %s".formatted(userId, type, message));
     }
 
-    protected abstract void specificPlay();
+    protected Set<UserEntity> getAllUsersInAJam(JamDTO jam) {
+        return userService.findAllEntitiesByIds(jam.participants());
+    }
+
+    protected abstract void specificPlay(MusicDTO musicDTO, JamDTO jamDTO);
 }

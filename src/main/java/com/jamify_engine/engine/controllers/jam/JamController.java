@@ -57,9 +57,10 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
      * @throws ExecutionControl.NotImplementedException
      */
     @PostMapping("/play/{musicId}/{jamId}")
-    void playMusic(@PathVariable final Long musicId, @PathVariable final Long jamId) throws ExecutionControl.NotImplementedException {
+    ResponseEntity<Boolean> playMusic(@PathVariable final Long musicId, @PathVariable final Long jamId) throws ExecutionControl.NotImplementedException {
         log.info("[REST CALL] - Playing the music with id {} for every user in jam with id {}", musicId, jamId);
         service.playMusic(musicId, jamId);
+        return ResponseEntity.ok(true);
     }
 
     /**
