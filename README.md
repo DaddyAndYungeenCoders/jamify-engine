@@ -1,9 +1,12 @@
 # jamify-engine
+The jamify main backend.
+## Qualité du Code
+
+### Couverture des Tests
 ![Coverage](.github/badges/jacoco.svg)
 ![Branches](.github/badges/branches.svg)
 
-The jamify main backend.
-
+Pour plus de détails, consultez notre [rapport de couverture détaillé](.github/test-coverage/coverage.md).
 ## Table of Contents
 
 - [Introduction](#introduction)
