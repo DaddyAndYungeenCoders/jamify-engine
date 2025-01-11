@@ -1,8 +1,11 @@
 name: "Generate Coverage Report"
 on:
+  push:
+    branches:
+      - '*'
   # S'exécute après le workflow principal de build
   workflow_run:
-    workflows: ["Build and Test"]
+    workflows: [ "Build and Test" ]
     types:
       - completed
 
