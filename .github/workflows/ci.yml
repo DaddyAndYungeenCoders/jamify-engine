@@ -1,0 +1,129 @@
+name: "CI/CD Workflow"
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: "Build and Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        env:
+          SPRING_PROFILES_ACTIVE: test
+        run: mvn -B package --file pom.xml -Dspring.profiles.active=test
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-artifact
+          path: target/*.jar
+
+  coverage:
+    name: "Generate Coverage Report"
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download JaCoCo Coverage Report
+        uses: actions/download-artifact@v3
+        with:
+          name: jacoco-report
+          path: ./target/site/jacoco
+
+      - name: Generate Coverage Report
+        run: |
+          JACOCO_CSV="target/site/jacoco/jacoco.csv"
+          
+          if [[ ! -f "$JACOCO_CSV" ]]; then
+            echo "JaCoCo CSV file not found at $JACOCO_CSV"
+            exit 1
+          fi
+          
+          GLOBAL_COVERAGE=$(awk -F',' 'NR>1 {total+=$8} END {print total/NR"%"}' "$JACOCO_CSV")
+          LINE_COVERAGE=$(awk -F',' 'NR>1 {total+=$6} END {print total/NR"%"}' "$JACOCO_CSV")
+          BRANCH_COVERAGE=$(awk -F',' 'NR>1 {total+=$7} END {print total/NR"%"}' "$JACOCO_CSV")
+          
+          mkdir -p .github/test-coverage
+          
+          cat << EOF > .github/test-coverage/coverage.md
+          # 📊 Rapport de Couverture des Tests
+          
+          ## Vue d'ensemble
+          | Métrique            | Couverture | Statut |
+          |---------------------|------------|--------|
+          | Couverture Globale  | $GLOBAL_COVERAGE | $([ "${GLOBAL_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
+          | Lignes de Code      | $LINE_COVERAGE | $([ "${LINE_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
+          | Branches            | $BRANCH_COVERAGE | $([ "${BRANCH_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
+          
+          ## ℹ️ Informations
+          - Dernière mise à jour : $(date '+%Y-%m-%d %H:%M:%S')
+          - Seuil minimal : 80%
+          EOF
+
+      - name: Commit Report
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: 'Mise à jour du rapport de couverture'
+          add: '.github/test-coverage/*'
+
+  docker:
+    name: "Docker Build and Push"
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-artifact
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/jamify-engine
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/jamify-engine:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/jamify-engine:buildcache,mode=max
