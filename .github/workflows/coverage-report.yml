@@ -1,4 +1,4 @@
-name: Generate Coverage Report
+name: "Generate Coverage Report"
 on:
   # S'exécute après le workflow principal de build
   workflow_run:
@@ -11,17 +11,17 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Log Message
+        run: |
+          echo "Processing JaCoCo Coverage Report..."
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Download JaCoCo Artifact
+      - name: Download Build Artifact
         uses: actions/download-artifact@v3
         with:
-          name: jacoco-report
-          path: jacoco-report.zip
-
-      - name: Unzip JaCoCo Report
-        run: unzip jacoco-report.zip -d jacoco-report
+          name: maven-artifact
+          path: ./target
 
       - name: Generate Coverage Report
         run: |
