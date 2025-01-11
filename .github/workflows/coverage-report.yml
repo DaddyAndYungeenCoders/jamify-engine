@@ -13,26 +13,14 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Download JaCoCo Report
-        uses: actions/github-script@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download JaCoCo Artifact
+        uses: actions/download-artifact@v3
         with:
-          script: |
-            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
-            });
-            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "jacoco-report"
-            })[0];
-            let download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: matchArtifact.id,
-              archive_format: 'zip',
-            });
-            let fs = require('fs');
-            fs.writeFileSync('jacoco-report.zip', Buffer.from(download.data));
+          name: jacoco-report
+          path: jacoco-report.zip
 
       - name: Unzip JaCoCo Report
         run: unzip jacoco-report.zip -d jacoco-report
@@ -40,26 +28,31 @@ jobs:
       - name: Generate Coverage Report
         run: |
           mkdir -p .github/test-coverage
-          
-          # Création du rapport avec un design moderne
+
+          # Extraire les métriques du fichier JaCoCo
+          GLOBAL_COVERAGE=$(cat jacoco-report/index.html | grep -o 'Total[^%]*%' | grep -o '[0-9]*%' | head -1)
+          LINE_COVERAGE=$(cat jacoco-report/index.html | grep -o 'Lines[^%]*%' | grep -o '[0-9]*%' | head -1)
+          BRANCH_COVERAGE=$(cat jacoco-report/index.html | grep -o 'Branches[^%]*%' | grep -o '[0-9]*%' | head -1)
+
+          # Créer un rapport de couverture en Markdown
           cat << EOF > .github/test-coverage/coverage.md
           # 📊 Rapport de Couverture des Tests
 
           ## Vue d'ensemble
           
-          | Métrique | Couverture | Statut |
-          |----------|------------|---------|
-          | Couverture Globale | \$(cat jacoco-report/index.html | grep -o 'Total[^%]*%' | grep -o '[0-9]*%' | head -1) | \$([ "\${COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
-          | Lignes de Code | \$(cat jacoco-report/index.html | grep -o 'Lines[^%]*%' | grep -o '[0-9]*%' | head -1) | \$([ "\${LINE_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
-          | Branches | \$(cat jacoco-report/index.html | grep -o 'Branches[^%]*%' | grep -o '[0-9]*%' | head -1) | \$([ "\${BRANCH_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
+          | Métrique            | Couverture | Statut |
+          |---------------------|------------|--------|
+          | Couverture Globale  | $GLOBAL_COVERAGE | $([ "${GLOBAL_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
+          | Lignes de Code      | $LINE_COVERAGE | $([ "${LINE_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
+          | Branches            | $BRANCH_COVERAGE | $([ "${BRANCH_COVERAGE//%/}" -ge 80 ] && echo "✅" || echo "❌") |
 
           ## 📈 Détails par Package
 
           Les packages les plus importants :
-          \$(awk -F',' 'NR>1 {print "- " $2 ": " $8 "% couverture"}' jacoco-report/jacoco.csv | head -5)
+          $(awk -F',' 'NR>1 {print "- " $2 ": " $8 "% couverture"}' jacoco-report/jacoco.csv | head -5)
 
           ## ℹ️ Informations
-          - Dernière mise à jour : \$(date '+%Y-%m-%d %H:%M:%S')
+          - Dernière mise à jour : $(date '+%Y-%m-%d %H:%M:%S')
           - Seuil minimal : 80%
           - [Voir le rapport complet](../jacoco-report/index.html)
 
