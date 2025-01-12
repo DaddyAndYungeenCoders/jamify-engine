@@ -48,7 +48,7 @@ public abstract class JamStrategy implements IJamStrategy {
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam with id %d could not be found".formatted(jamId)));
         Long currentUserId = getCurrentUser().getId();
 
-        if (!Objects.equals(jam.getHost().getId(), currentUserId)) {
+        if (!Objects.equals(jam.getHost().getId(), currentUserId) || !JamStatusEnum.RUNNING.equals(jam.getStatus())) {
             throw new UnauthorizedException(currentUserId);
         }
 
