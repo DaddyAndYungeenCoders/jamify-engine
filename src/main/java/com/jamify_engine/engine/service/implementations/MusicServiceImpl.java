@@ -46,6 +46,6 @@ public class MusicServiceImpl implements MusicService {
     }
 
     public MusicEntity findMusicByIsrc(String isrc) {
-        return musicRepository.findMusicIdByMusicIsrc(isrc).orElseThrow(() -> new MusicNotFoundException("No music is corresponding to the isrc %s".formatted(isrc)));
+        return musicRepository.findMusicEntityByIsrc(isrc).orElseThrow(() -> new MusicNotFoundException("No music is corresponding to the isrc %s".formatted(isrc)));
     }
 }

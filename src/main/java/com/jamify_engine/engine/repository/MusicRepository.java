@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface MusicRepository extends JpaRepository<MusicEntity, Long> {
     @Query("SELECT m FROM music m WHERE m.isrc = ?1")
-    Optional<MusicEntity> findMusicIdByMusicIsrc(String isrc);
+    Optional<MusicEntity> findMusicEntityByIsrc(String isrc);
 }
