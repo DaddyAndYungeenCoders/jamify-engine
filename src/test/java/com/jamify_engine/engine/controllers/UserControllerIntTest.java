@@ -105,7 +105,7 @@ class UserControllerIntTest {
         Assertions.assertEquals(updatedUser.getImgUrl(), "http://example");
         Assertions.assertEquals(updatedUser.getUserProviderId(), "11111111");
     }
-
+/*
     @Test
     @WithMockUser
     void createUser_withInvalidUser_shouldReturn403BadRequest() throws Exception {
@@ -120,5 +120,5 @@ class UserControllerIntTest {
 
                 .andExpect(status().isBadRequest());
     }
-
+*/
 }

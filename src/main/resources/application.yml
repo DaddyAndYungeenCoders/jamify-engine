@@ -44,6 +44,14 @@ springdoc:
         path: /swagger-ui.html
 
 config:
+    external:
+        apis:
+            spotify:
+                url:
+                    base: https://api.spotify.com/v1
+            amazon:
+                url:
+                    base: todo
     uaa:
         url:
             base: ${JAMIFY_UAA_BASE_URL}

@@ -3,6 +3,8 @@ package com.jamify_engine.engine.models.dto;
 import lombok.Builder;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,4 +22,17 @@ public record UserDTO(
 
         // TODO: Add more fields
 ) implements Serializable {
+    public static class UserDTOBuilder {
+        UserDTOBuilder() {
+            name = "default name";
+            email = "default email";
+            country = "FR";
+            provider = "Spotify";
+            imgUrl = "default image";
+            userProviderId = "default userProviderId";
+            roles = new HashSet<>();
+            jams = new ArrayList<>();
+            hasJamRunning = false;
+        }
+    }
 }

@@ -58,7 +58,7 @@ public class JamControllerIntTest {
 
     private List<MusicDTO> buildQueue() {
         List<MusicDTO> musicDTOS = new ArrayList<>();
-        MusicDTO mockMusicContent = new MusicDTO(TEST_MUSIC_ID);
+        MusicDTO mockMusicContent = new MusicDTO(TEST_MUSIC_ID, "", "", "", "", "", "", new HashSet<>());
         musicDTOS.add(mockMusicContent);
         return musicDTOS;
     }
