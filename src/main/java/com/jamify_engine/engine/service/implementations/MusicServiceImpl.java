@@ -34,7 +34,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public MusicDTO findById(Long entityId) throws ExecutionControl.NotImplementedException {
+    public MusicDTO findById(Long entityId) {
         return musicMapper.toDTO(
                     musicRepository.findById(entityId).orElseThrow(() -> new MusicNotFoundException("Music not found"))
                 );

@@ -1,6 +1,5 @@
 package com.jamify_engine.engine.service.jams;
 
-import com.jamify_engine.engine.config.webClient.SpotifyWebClient;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
@@ -14,29 +13,21 @@ import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
-import com.jamify_engine.engine.service.implementations.JamStrategy;
 import com.jamify_engine.engine.service.implementations.SpotifyJamStrategy;
 import com.jamify_engine.engine.service.interfaces.MusicService;
 import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
 import com.jamify_engine.engine.service.interfaces.UserService;
 import com.jamify_engine.engine.utils.TestsUtils;
 import jdk.jshell.spi.ExecutionControl;
-import org.h2.engine.User;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
@@ -93,6 +84,11 @@ class SpotifyJamStrategyTest {
     @AfterEach
     void teardown() {
         userEntityShared = TestsUtils.buildUserEntity();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
