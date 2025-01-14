@@ -1,10 +1,8 @@
 package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
-import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
-import com.jamify_engine.engine.models.entities.AddressType;
 import com.jamify_engine.engine.models.entities.EventEntity;
 import com.jamify_engine.engine.models.entities.EventStatus;
 import com.jamify_engine.engine.models.entities.UserEntity;
@@ -15,27 +13,23 @@ import com.jamify_engine.engine.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.chrono.ChronoLocalDateTime;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.jamify_engine.engine.utils.SecurityUtils.getCurrentUser;
 
 @Slf4j
 @Service
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
-    private final UserService userService;
 
     public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserService userService) {
         this.eventRepository = eventRepository;
         this.eventMapper = eventMapper;
-        this.userService = userService;
     }
 
     @Transactional
@@ -121,10 +115,5 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(eventMapper::toDTO)
                 .toList();
-    }
-
-    private UserEntity getCurrentUser() {
-        Object email = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userService.findEntityByEmail(email.toString());
     }
 }
