@@ -1,6 +1,7 @@
 package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
+import com.jamify_engine.engine.exceptions.common.NotFoundException;
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.models.entities.EventEntity;
@@ -76,6 +77,9 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("Status '" + status + "' is not valid.");
         }
         return eventRepository.findAllByStatus(status)
+                .orElseThrow(
+                        () -> new NotFoundException("No events found with status '" + status + "'.")
+                )
                 .stream()
                 .map(eventMapper::toDTO)
                 .toList();
