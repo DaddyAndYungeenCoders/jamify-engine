@@ -79,9 +79,6 @@ public class EventServiceImpl implements EventService {
 
         eventEntity.setStatus(EventStatus.CANCELLED);
 
-        // remove all participants except host
-        Set<UserEntity> participants = eventEntity.getParticipants();
-        participants.removeIf(userEntity -> !userEntity.getId().equals(eventEntity.getHost().getId()));
         // notify participants
         // TODO
 
