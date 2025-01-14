@@ -14,9 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -76,6 +75,11 @@ public class UserServiceImpl implements UserService {
         UserEntity updatedUserEntity = userRepository.save(allowedUserToUpdate);
 
         return userMapper.toDTO(updatedUserEntity);
+    }
+
+    @Override
+    public Set<UserEntity> findAllEntitiesByIds(Set<Long> ids) {
+        return new HashSet<>(userRepository.findAllById(ids));
     }
 
     @Override

@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.util.Set;
 
-@Entity
+@Entity(name = "music")
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
@@ -20,7 +20,7 @@ public class MusicEntity {
     @Column(name = "music_id")
     private Long id;
 
-    @Column(name = "music_isrc")
+    @Column(name = "music_isrc", unique = true)
     private String isrc;
     @Column(name = "music_author")
     private String author;

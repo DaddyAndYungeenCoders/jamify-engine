@@ -2,6 +2,7 @@ package com.jamify_engine.engine.models.mappers;
 
 import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.UserDTO;
+import com.jamify_engine.engine.models.dto.event.EventParticipantDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import org.mapstruct.Mapper;
@@ -53,7 +54,6 @@ public interface UserMapper {
         for (JamEntity jam : jamEntities) {
             result.add(JAM_MAPPER.toDTO(jam));
         }
-
         return result;
     }
 }

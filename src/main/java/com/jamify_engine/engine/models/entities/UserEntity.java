@@ -2,10 +2,12 @@ package com.jamify_engine.engine.models.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jdk.jfr.Event;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.Set;
 
@@ -59,6 +61,18 @@ public class UserEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jam_id")
     private JamEntity currentJam;
+
+    @ManyToMany
+    @JoinTable(
+            name = "event_participants",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    private Set<EventEntity> events;
+
+    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EventEntity> hostedEvents;
+
 
 /* FIXME remove comments and create badge entity (com.jamify_engine.engine.models.entities.BadgeEntity)
     @ManyToMany
