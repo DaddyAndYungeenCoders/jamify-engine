@@ -28,13 +28,14 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-import static com.jamify_engine.engine.utils.Constants.TEST_USER_EMAIL;
-import static com.jamify_engine.engine.utils.Constants.TEST_USER_EMAIL_2;
+import static com.jamify_engine.engine.utils.Constants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,9 +72,8 @@ class EventControllerIntTest {
         EventCreateDTO eventCreateDto = TestsUtils.buildEventCreateDto();
         EventDTO eventBefore = eventService.findById(3L);
 
-        // 3L : scheduled event, test user is host, check if test user is participant
-        ArrayList<String> expectedParticipants = new ArrayList<>();
-        expectedParticipants.add(TEST_USER_EMAIL);
+        // 3L : scheduled event, test user is host and participant, check if test user is participant
+        ArrayList<String> expectedParticipants = new ArrayList<>(List.of(TEST_USER_EMAIL, TEST_EXPIRED_USER_EMAIL));
         Assertions.assertArrayEquals(expectedParticipants.toArray(), eventBefore.getParticipants().stream().map(EventParticipantDTO::getEmail).toArray());
 
         mockMvc.perform(post("/api/v1/events/createHostedEvent")
@@ -142,10 +142,10 @@ class EventControllerIntTest {
         EventDTO event = objectMapper.readValue(contentAsString, EventDTO.class);
         Assertions.assertNotNull(event);
         Assertions.assertEquals(availableEventId, event.getId());
-        Assertions.assertEquals(2, event.getParticipants().size());
+        Assertions.assertEquals(3, event.getParticipants().size());
         assertThat(event.getParticipants().stream()
                 .map(EventParticipantDTO::getEmail)
-                .toList(), containsInAnyOrder(TEST_USER_EMAIL, TEST_USER_EMAIL_2));
+                .toList(), containsInAnyOrder(TEST_USER_EMAIL, TEST_USER_EMAIL_2, TEST_EXPIRED_USER_EMAIL));
     }
 
     @Test
@@ -167,6 +167,44 @@ class EventControllerIntTest {
         mockMvc.perform(post("/api/v1/events/join/" + availableEventId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").value("User is already a participant of this event."));
+    }
+
+    @Test
+    void cancelEvent_withScheduledEvent_shouldReturnNoContent() throws Exception {
+        // 3L : future event
+        Long eventId = 3L;
+
+        EventDTO eventBefore = eventService.findById(eventId);
+        Assertions.assertNotNull(eventBefore);
+        Assertions.assertEquals(EventStatus.SCHEDULED, eventBefore.getStatus());
+        Assertions.assertEquals(2, eventBefore.getParticipants().size());
+
+        mockMvc.perform(put("/api/v1/events/cancel/" + eventId))
+                .andExpect(status().isNoContent());
+
+        EventDTO event = eventService.findById(eventId);
+        Assertions.assertNotNull(event);
+        Assertions.assertEquals(EventStatus.CANCELLED, event.getStatus());
+        Assertions.assertEquals(1, event.getParticipants().size());
+        Assertions.assertEquals("Test User", event.getParticipants().iterator().next().getUsername());
+    }
+
+    @Test
+    void cancelEvent_withFinishedEvent_shouldReturnBadRequest() throws Exception {
+        // 2L : past event
+        Long eventId = 2L;
+
+        mockMvc.perform(put("/api/v1/events/cancel/" + eventId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").value("Event with id '2' is not cancelable."));
+    }
+
+    @Test
+    void cancelEvent_withNonExistingEvent_shouldReturnNotFound() throws Exception {
+        Long eventId = 999L;
+
+        mockMvc.perform(put("/api/v1/events/cancel/" + eventId))
+                .andExpect(status().isNotFound());
     }
 
 }

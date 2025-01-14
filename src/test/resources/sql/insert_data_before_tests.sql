@@ -38,3 +38,5 @@ VALUES ('scheduled-event', '2030-04-01 00:00:00', 'SCHEDULED', '3 rue de la paix
 -- Insert Event Users
 INSERT INTO event_participants (user_id, event_id)
 VALUES (1, 3); -- Test User in scheduled-event as host
+INSERT INTO event_participants (user_id, event_id)
+VALUES (3, 3); -- Test User 2 in scheduled-event

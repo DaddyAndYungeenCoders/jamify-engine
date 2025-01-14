@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -45,4 +46,17 @@ public class EventController extends CRUDController<EventDTO, EventService> {
         return service.joinEvent(eventId);
     }
 
+    @Operation(summary = "Cancel an event",
+            description = "Cancel an SCHEDULED event in the Jamify Engine.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Event canceled successfully."),
+                    @ApiResponse(responseCode = "400", description = "Event is not cancelable."),
+                    @ApiResponse(responseCode = "404", description = "Event not found."),
+            })
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity cancelEvent(@PathVariable Long id) {
+        log.info("[REST] PUT /cancel/{id} - Canceling event with id: {}", id);
+        service.cancelEvent(id);
+        return ResponseEntity.noContent().build();
+    }
 }

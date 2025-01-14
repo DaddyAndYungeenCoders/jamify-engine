@@ -1,6 +1,7 @@
 package com.jamify_engine.engine.exceptions;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
+import com.jamify_engine.engine.exceptions.common.NotFoundException;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.musics.MusicNotFoundException;
 import com.jamify_engine.engine.exceptions.security.AccessTokenNotFoundException;
@@ -8,6 +9,7 @@ import com.jamify_engine.engine.exceptions.security.InvalidApiKeyException;
 import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
 import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -53,6 +55,11 @@ public class Translator extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({MusicNotFoundException.class})
     public ResponseEntity<Object> handleMusicNotFound(final Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({NotFoundException.class})
+    public ResponseEntity<Object> handleNotFoundException(final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

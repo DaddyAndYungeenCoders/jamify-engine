@@ -1,6 +1,7 @@
 package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
+import com.jamify_engine.engine.exceptions.common.NotFoundException;
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.models.entities.EventEntity;
@@ -64,6 +65,27 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(eventEntity);
 
         return eventMapper.toDTO(eventEntity);
+    }
+
+    @Override
+    @Transactional
+    public void cancelEvent(Long eventId) {
+        EventEntity eventEntity = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id " + eventId + " not found."));
+
+        if (eventEntity.getStatus() != EventStatus.SCHEDULED) {
+            throw new BadRequestException("Event with id '" + eventId + "' is not cancelable.");
+        }
+
+        eventEntity.setStatus(EventStatus.CANCELLED);
+
+        // remove all participants except host
+        Set<UserEntity> participants = eventEntity.getParticipants();
+        participants.removeIf(userEntity -> !userEntity.getId().equals(eventEntity.getHost().getId()));
+        // notify participants
+        // TODO
+
+        eventRepository.save(eventEntity);
     }
 
     private void validateJoiningEvent(UserEntity userEntity, EventEntity eventEntity) {

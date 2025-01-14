@@ -13,4 +13,6 @@ public interface EventService extends ServiceBasics<EventDTO> {
     Set<EventEntity> findAllByHostId(long hostId);
 
     EventDTO joinEvent(Long eventId);
+
+    void cancelEvent(Long eventId);
 }
