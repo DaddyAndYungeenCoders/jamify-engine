@@ -17,4 +17,5 @@ public interface IJamStrategy extends ServiceBasics<JamDTO> {
     JamDTO launchAJam(JamInstantLaunching jamVM);
     JamEntity findRunningJamForUser();
     void stopAJam(Long jamId);
+    List<JamDTO> findAllRunningJams();
 }
