@@ -15,4 +15,6 @@ public interface EventService extends ServiceBasics<EventDTO> {
     EventDTO joinEvent(Long eventId);
 
     void cancelEvent(Long eventId);
+
+    void leaveEvent(Long eventId);
 }

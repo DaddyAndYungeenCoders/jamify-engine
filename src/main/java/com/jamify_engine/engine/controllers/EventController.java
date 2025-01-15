@@ -59,4 +59,18 @@ public class EventController extends CRUDController<EventDTO, EventService> {
         service.cancelEvent(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Leave an event",
+            description = "Leave an event in the Jamify Engine.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Event left successfully."),
+                    @ApiResponse(responseCode = "400", description = "Event is not leavable."),
+                    @ApiResponse(responseCode = "404", description = "Event not found."),
+            })
+    @PutMapping("/leave/{id}")
+    public ResponseEntity leaveEvent(@PathVariable Long id) {
+        log.info("[REST] PUT /leave/{id} - Leaving event with id: {}", id);
+        service.leaveEvent(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -5,6 +5,7 @@ import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.interfaces.UserService;
+import com.jamify_engine.engine.utils.SecurityTestsUtils;
 import com.jamify_engine.engine.utils.TestsUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,7 +44,7 @@ class UserControllerIntTest {
 
     @BeforeEach
     void setUp() {
-        SecurityContextHolder.getContext().setAuthentication(TestsUtils.mocktestUser1Authenticated());
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestUser1Authenticated());
     }
 
     @AfterEach

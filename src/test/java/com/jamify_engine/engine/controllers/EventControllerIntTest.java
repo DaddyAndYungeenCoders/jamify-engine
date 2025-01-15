@@ -10,6 +10,7 @@ import com.jamify_engine.engine.models.entities.EventStatus;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.implementations.EventServiceImpl;
 import com.jamify_engine.engine.service.interfaces.UserService;
+import com.jamify_engine.engine.utils.SecurityTestsUtils;
 import com.jamify_engine.engine.utils.TestsUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +60,7 @@ class EventControllerIntTest {
     @BeforeEach
     void setUp() {
         // mock authenticated with test-user@example.com
-        SecurityContextHolder.getContext().setAuthentication(TestsUtils.mocktestUser1Authenticated());
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestUser1Authenticated());
     }
 
     @AfterEach
@@ -131,7 +132,7 @@ class EventControllerIntTest {
         Long availableEventId = 3L;
 
         //mock another user to join the event
-        SecurityContextHolder.getContext().setAuthentication(TestsUtils.mocktestUser2Authenticated());
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestUser2Authenticated());
 
         ResultActions resultActions = mockMvc.perform(post("/api/v1/events/join/" + availableEventId))
                 .andExpect(status().isOk());
@@ -204,6 +205,58 @@ class EventControllerIntTest {
         Long eventId = 999L;
 
         mockMvc.perform(put("/api/v1/events/cancel/" + eventId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void leaveEvent_beingParticipantOfEvent_shouldReturnNoContent() throws Exception {
+        // 3L : future event
+        Long eventId = 3L;
+
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestExpiredUserAuthenticated());
+
+        EventDTO eventBefore = eventService.findById(eventId);
+        Assertions.assertNotNull(eventBefore);
+        Assertions.assertEquals(EventStatus.SCHEDULED, eventBefore.getStatus());
+        Assertions.assertEquals(2, eventBefore.getParticipants().size());
+
+        mockMvc.perform(put("/api/v1/events/leave/" + eventId))
+                .andExpect(status().isNoContent());
+
+        EventDTO event = eventService.findById(eventId);
+        Assertions.assertNotNull(event);
+        Assertions.assertEquals(EventStatus.SCHEDULED, event.getStatus());
+        Assertions.assertEquals(1, event.getParticipants().size());
+        Assertions.assertEquals("Test User", event.getParticipants().iterator().next().getUsername());
+    }
+
+    @Test
+    void leaveEvent_beingHost_shouldReturnBadRequest() throws Exception {
+        // 3L : future event
+        Long eventId = 3L;
+
+        mockMvc.perform(put("/api/v1/events/leave/" + eventId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").value("Host cannot leave the event."));
+    }
+
+    @Test
+    void leaveEvent_notParticipantOfEvent_shouldReturnBadRequest() throws Exception {
+        // 3L : future event
+        Long eventId = 3L;
+
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestUser2Authenticated());
+
+        mockMvc.perform(put("/api/v1/events/leave/" + eventId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").value("User is not a participant of this event."));
+    }
+
+    @Test
+    void leaveEvent_nonExistingEvent_shouldReturnNotFound() throws Exception {
+        Long eventId = 999L;
+
+        mockMvc.perform(put("/api/v1/events/leave/" + eventId))
                 .andExpect(status().isNotFound());
     }
 

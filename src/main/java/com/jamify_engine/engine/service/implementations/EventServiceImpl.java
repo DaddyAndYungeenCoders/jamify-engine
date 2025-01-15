@@ -85,6 +85,20 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(eventEntity);
     }
 
+    @Override
+    @Transactional
+    public void leaveEvent(Long eventId) {
+        EventEntity eventEntity = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id " + eventId + " not found."));
+
+        UserEntity userEntity = getCurrentUser();
+
+        validateLeavingEvent(userEntity, eventEntity);
+
+        eventEntity.getParticipants().remove(userEntity);
+        eventRepository.save(eventEntity);
+    }
+
     private void validateJoiningEvent(UserEntity userEntity, EventEntity eventEntity) {
         if (eventEntity.getStatus() == EventStatus.FINISHED) {
             throw new BadRequestException("Event has already finished.");
@@ -96,6 +110,16 @@ public class EventServiceImpl implements EventService {
 
         if (eventEntity.getParticipants().contains(userEntity)) {
             throw new BadRequestException("User is already a participant of this event.");
+        }
+    }
+
+    private void validateLeavingEvent(UserEntity userEntity, EventEntity eventEntity) {
+        if (eventEntity.getHost().equals(userEntity)) {
+            throw new BadRequestException("Host cannot leave the event.");
+        }
+
+        if (!eventEntity.getParticipants().contains(userEntity)) {
+            throw new BadRequestException("User is not a participant of this event.");
         }
     }
 
