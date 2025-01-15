@@ -185,7 +185,7 @@ class EventControllerIntTest {
         EventDTO event = eventService.findById(eventId);
         Assertions.assertNotNull(event);
         Assertions.assertEquals(EventStatus.CANCELLED, event.getStatus());
-        Assertions.assertEquals(1, event.getParticipants().size());
+        Assertions.assertEquals(2, event.getParticipants().size());
         Assertions.assertEquals("Test User", event.getParticipants().iterator().next().getUsername());
     }
 
