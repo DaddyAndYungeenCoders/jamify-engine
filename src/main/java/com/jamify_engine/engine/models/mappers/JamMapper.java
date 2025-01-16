@@ -8,17 +8,25 @@ import com.jamify_engine.engine.models.entities.UserEntity;
 import org.mapstruct.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface JamMapper {
-    @Mapping(target = "themes", source = "tags", qualifiedByName = "mapTagsToThemes") // ici, themes est un Set<String> et tags est un Set<TagEntity>, j'aimerais utiliser le TagEntity.label en guise de themes
+    @Mapping(target = "themes", source = "tags", qualifiedByName = "mapTagsToThemes")
     @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
     @Mapping(target = "hostId", source = "host", qualifiedByName = "mapHost")
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
     @Mapping(target = "status", source = "status")
     JamDTO toDTO(JamEntity entity);
+
+    @Mapping(target = "themes", source = "tags", qualifiedByName = "mapTagsToThemes")
+    @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
+    @Mapping(target = "hostId", source = "host", qualifiedByName = "mapHost")
+    @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
+    @Mapping(target = "status", source = "status")
+    List<JamDTO> toDTO(List<JamEntity> entities);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "host", ignore = true)
@@ -28,6 +36,15 @@ public interface JamMapper {
     @Mapping(target = "messages", expression = "java(mapMessageIds(dto.messages()))")
     @Mapping(source = "scheduledDate", target = "schedStart")
     JamEntity toEntity(JamDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "host", ignore = true)
+    @Mapping(target = "hostId", source = "hostId")
+    @Mapping(target = "tags", expression = "java(mapThemesToTags(dto.themes()))")
+    @Mapping(target = "participants", expression = "java(mapParticipantIds(dto.participants()))")
+    @Mapping(target = "messages", expression = "java(mapMessageIds(dto.messages()))")
+    @Mapping(source = "scheduledDate", target = "schedStart")
+    List<JamEntity> toEntity(List<JamDTO> dto);
 
     // TODO use tagsMapperWhenItIsCreated
     @Named("mapThemesToTags")
