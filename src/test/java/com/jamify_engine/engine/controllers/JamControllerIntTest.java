@@ -3,12 +3,9 @@ package com.jamify_engine.engine.controllers;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.jamify_engine.engine.controllers.jam.JamController;
 import com.jamify_engine.engine.models.dto.JamDTO;
-import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.security.SecurityTestConfig;
-import com.jamify_engine.engine.service.implementations.JamStrategy;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
 import com.jamify_engine.engine.utils.TestsUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,14 +22,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,9 +70,7 @@ public class JamControllerIntTest {
 
         // Then
         String content = result.getResponse().getContentAsString();
-        ObjectMapper mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = new ObjectMapper();
 
         List<JamDTO> jams = mapper.readValue(
                 content,

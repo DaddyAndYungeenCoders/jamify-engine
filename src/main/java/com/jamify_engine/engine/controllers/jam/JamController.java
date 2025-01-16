@@ -35,8 +35,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
             description = "Allows the connected user to join a specific jam session"
     )
     @PutMapping("/join/{jamId}")
-    void join(@Parameter(description = "ID of the jam to join") @PathVariable("jamId") Long jamId)
-            throws ExecutionControl.NotImplementedException {
+    void join(@Parameter(description = "ID of the jam to join") @PathVariable("jamId") Long jamId) {
         log.info("[REST CALL] - User Joining jam with id {}", jamId);
         service.joinJam(jamId);
     }
@@ -55,8 +54,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
             description = "Allows the connected user to leave a specific jam session"
     )
     @PutMapping("/leave/{jamId}")
-    void leave(@Parameter(description = "ID of the jam to leave") @PathVariable Long jamId)
-            throws ExecutionControl.NotImplementedException {
+    void leave(@Parameter(description = "ID of the jam to leave") @PathVariable Long jamId) {
         log.info("[REST CALL] - User Leaving jam with id {}", jamId);
         service.leaveJam(jamId);
     }
@@ -65,6 +63,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
             summary = "Get queued music in a jam",
             description = "Retrieves all queued music tracks in a specific jam session",
             responses = {
+                    @ApiResponse(responseCode = "404", description = "The requested jam was not found"),
                     @ApiResponse(responseCode = "200", description = "List of queued music successfully retrieved")
             }
     )
@@ -81,6 +80,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
             summary = "Play music in a jam",
             description = "Broadcasts a specific music track in a jam session",
             responses = {
+                    @ApiResponse(responseCode = "404", description = "The requested jam was not found"),
                     @ApiResponse(responseCode = "200", description = "Music successfully started playing")
             }
     )
@@ -98,6 +98,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
             summary = "Launch a jam session",
             description = "Makes a jam joinable by updating its status and the host status",
             responses = {
+                    @ApiResponse(responseCode = "404", description = "The requested jam was not found"),
                     @ApiResponse(responseCode = "200", description = "Jam successfully launched")
             }
     )
@@ -111,6 +112,7 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
             summary = "Stop a jam session",
             description = "Stops a running jam session",
             responses = {
+                    @ApiResponse(responseCode = "404", description = "The requested jam was not found"),
                     @ApiResponse(responseCode = "200", description = "Jam successfully stopped")
             }
     )
