@@ -20,4 +20,8 @@ public class SecurityUtils {
         Object email = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.findEntityByEmail(email.toString());
     }
+
+    public static UserEntity findByEmail(String email) {
+        return userService.findEntityByEmail(email);
+    }
 }

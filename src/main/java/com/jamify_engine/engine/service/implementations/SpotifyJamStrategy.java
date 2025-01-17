@@ -7,6 +7,7 @@ import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.UserAccessTokenEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
+import com.jamify_engine.engine.models.enums.ProvidersEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.repository.JamRepository;
@@ -48,7 +49,7 @@ public class SpotifyJamStrategy extends JamStrategy {
         Set<String> accessTokens = new HashSet<>();
 
         for (UserEntity user: getAllUsersInAJam(jam)) {
-            accessTokens.add(userAccessTokenService.getAccessToken(user.getEmail(), "spotify"));
+            accessTokens.add(userAccessTokenService.getAccessToken(user.getEmail(), ProvidersEnum.SPOTIFY.getProvider()));
         }
 
         for (String accessToken: accessTokens) {
