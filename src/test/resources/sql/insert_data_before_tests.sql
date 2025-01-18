@@ -40,3 +40,5 @@ INSERT INTO event_participants (user_id, event_id)
 VALUES (1, 3); -- Test User in scheduled-event as host
 INSERT INTO event_participants (user_id, event_id)
 VALUES (3, 3); -- Test ExpiredUser in scheduled-event as participant
+INSERT INTO event_participants (user_id, event_id)
+VALUES (2, 2); -- Test User 2 in past-event as participant

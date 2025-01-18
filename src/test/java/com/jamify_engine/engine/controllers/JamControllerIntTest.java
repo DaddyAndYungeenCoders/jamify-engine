@@ -5,7 +5,7 @@ import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
-import com.jamify_engine.engine.utils.TestsUtils;
+import com.jamify_engine.engine.utils.SecurityTestsUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ public class JamControllerIntTest {
 
     @BeforeEach
     void setUp() {
-        SecurityContextHolder.getContext().setAuthentication(TestsUtils.mocktestUser1Authenticated());
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestUser1Authenticated());
     }
 
     @AfterEach
