@@ -10,6 +10,7 @@ import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.repository.UserAccessTokenRepository;
 import com.jamify_engine.engine.repository.UserRepository;
 import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
+import com.jamify_engine.engine.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,9 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
         if (userAccessToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             log.debug("Access token expired for user {}. Refreshing...", email);
             String refreshedToken = refreshAccessToken(email, provider);
+            if (refreshedToken == null) {
+                throw new AccessTokenProcessingException("Error while refreshing access token for user: " + email + " and provider: " + provider);
+            }
             userAccessToken.setAccessToken(refreshedToken);
             userAccessToken.setExpiresAt(LocalDateTime.now().plusHours(1));
             userAccessTokenRepository.save(userAccessToken);
@@ -79,13 +83,15 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
      * @throws RuntimeException if the access token refresh fails
      */
     private String refreshAccessToken(String email, String provider) {
-        String refreshAccessTokenParams = "?provider=%s&email=%s";
+        String refreshAccessTokenParams = "/auth/refresh-access-token?provider=%s&email=%s";
         String uri = String.format(refreshAccessTokenParams, provider, email);
+        String jwt = SecurityUtils.getCurrentUserJwt();
 
         try {
             ProviderAccessTokenResponse res = uaaWebClient
                     .post()
                     .uri(uri)
+                    .header("Authorization", "Bearer " + jwt)
                     .retrieve()
                     .bodyToMono(ProviderAccessTokenResponse.class)
                     .block();
