@@ -16,6 +16,7 @@ import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +49,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<EventEntity> findAllByHostId(long hostId) {
-        return eventRepository.findAllByHostId(hostId);
+    public List<EventDTO> findAllByHostId(long hostId) {
+        return eventRepository.findAllByHostId(hostId)
+                .stream()
+                .map(eventMapper::toDTO)
+                .toList();
     }
 
     @Override
@@ -97,6 +101,20 @@ public class EventServiceImpl implements EventService {
 
         eventEntity.getParticipants().remove(userEntity);
         eventRepository.save(eventEntity);
+    }
+
+    @Override
+    public List<EventDTO> findByStatus(EventStatus status) {
+        if (status == null || !Arrays.asList(EventStatus.values()).contains(status)) {
+            throw new BadRequestException("Status '" + status + "' is not valid.");
+        }
+        return eventRepository.findAllByStatus(status)
+                .orElseThrow(
+                        () -> new NotFoundException("No events found with status '" + status + "'.")
+                )
+                .stream()
+                .map(eventMapper::toDTO)
+                .toList();
     }
 
     private void validateJoiningEvent(UserEntity userEntity, EventEntity eventEntity) {
@@ -153,7 +171,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDTO> findAll() throws ExecutionControl.NotImplementedException {
+    public List<EventDTO> findAll() {
         return eventRepository.findAll()
                 .stream()
                 .map(eventMapper::toDTO)
