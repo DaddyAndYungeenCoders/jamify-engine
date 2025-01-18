@@ -67,7 +67,7 @@ public class JamControllerTest {
         // GIVEN
         // WHEN
         mockMvc.perform(put("/api/jams/join/{jamId}", TEST_JAM_ID)
-                .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andExpect(status().isOk());
         // THEN

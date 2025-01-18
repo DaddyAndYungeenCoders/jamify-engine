@@ -63,7 +63,6 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
 
-
     @Override
     public List<MusicDTO> getAllInQueue(Long jamId) throws ExecutionControl.NotImplementedException {
         throw new ExecutionControl.NotImplementedException("not yet");
@@ -214,7 +213,7 @@ public abstract class JamStrategy implements IJamStrategy {
                 .stream()
                 .filter(jamDTO ->
                         JamStatusEnum.RUNNING.equals(jamDTO.status())).findFirst().orElseThrow(
-                                () -> new JamNotFoundException("Jam not found")
+                        () -> new JamNotFoundException("Jam not found")
                 );
     }
 

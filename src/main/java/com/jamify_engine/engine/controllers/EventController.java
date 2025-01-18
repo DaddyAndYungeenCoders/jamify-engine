@@ -7,9 +7,9 @@ import com.jamify_engine.engine.service.interfaces.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,12 +48,42 @@ public class EventController extends CRUDController<EventDTO, EventService> {
         return service.joinEvent(eventId);
     }
 
+    @Operation(summary = "Cancel an event",
+            description = "Cancel an SCHEDULED event in the Jamify Engine.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Event canceled successfully."),
+                    @ApiResponse(responseCode = "400", description = "Event is not cancelable."),
+                    @ApiResponse(responseCode = "404", description = "Event not found."),
+            })
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity cancelEvent(@PathVariable Long id) {
+        log.info("[REST] PUT /cancel/{id} - Canceling event with id: {}", id);
+        service.cancelEvent(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Leave an event",
+            description = "Leave an event in the Jamify Engine.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Event left successfully."),
+                    @ApiResponse(responseCode = "400", description = "Event is not leavable."),
+                    @ApiResponse(responseCode = "404", description = "Event not found."),
+            })
+
+    @PutMapping("/leave/{id}")
+    public ResponseEntity leaveEvent(@PathVariable Long id) {
+        log.info("[REST] PUT /leave/{id} - Leaving event with id: {}", id);
+        service.leaveEvent(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Find events by status",
             description = "Find events by status in the Jamify Engine.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Events found successfully."),
                     @ApiResponse(responseCode = "400", description = "Invalid status."),
             })
+
     @GetMapping("/with-status/{status}")
     public List<EventDTO> findByStatus(@PathVariable EventStatus status) {
         log.info("[REST] GET /findByStatus - Finding events by status: {}", status);

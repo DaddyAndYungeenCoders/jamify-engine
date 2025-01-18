@@ -5,7 +5,9 @@ import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.JamMessageEntity;
 import com.jamify_engine.engine.models.entities.TagEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.HashSet;
 import java.util.List;
