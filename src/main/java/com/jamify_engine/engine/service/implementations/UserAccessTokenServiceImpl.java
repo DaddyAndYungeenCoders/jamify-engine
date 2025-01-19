@@ -59,14 +59,13 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
             throw new AccessTokenNotFoundException("Access token not found for user: " + email + " and provider: " + provider);
         }
 
-        // FIXME aled
-//        if (userAccessToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-//            log.debug("Access token expired for user {}. Refreshing...", email);
-//            String refreshedToken = refreshAccessToken(email, provider);
-//            userAccessToken.setAccessToken(refreshedToken);
-//            userAccessToken.setExpiresAt(LocalDateTime.now().plusHours(1));
-//            userAccessTokenRepository.save(userAccessToken);
-//        }
+        if (userAccessToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            log.debug("Access token expired for user {}. Refreshing...", email);
+            String refreshedToken = refreshAccessToken(email, provider);
+            userAccessToken.setAccessToken(refreshedToken);
+            userAccessToken.setExpiresAt(LocalDateTime.now().plusHours(1));
+            userAccessTokenRepository.save(userAccessToken);
+        }
 
         return userAccessToken.getAccessToken();
     }
@@ -79,7 +78,8 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
      * @return the refreshed access token
      * @throws RuntimeException if the access token refresh fails
      */
-    private String refreshAccessToken(String email, String provider) {
+    @Override
+    public String refreshAccessToken(String email, String provider) {
         String refreshAccessTokenParams = "/api/v1/auth/refresh-access-token?provider=%s&email=%s";
         String uri = String.format(refreshAccessTokenParams, provider, email);
 
@@ -101,6 +101,12 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
             log.error("Error while refreshing access token: {}", e.getMessage());
             throw e;
         }
+    }
+
+    @Override
+    public String refreshAccessToken(Long jamifyUserId, String provider) {
+        String email = this.userRepository.findById(jamifyUserId).orElseThrow(() -> new UserNotFoundException("User with id %d does not exist".formatted(jamifyUserId))).getEmail();
+        return this.refreshAccessToken(email, provider);
     }
 
     /**

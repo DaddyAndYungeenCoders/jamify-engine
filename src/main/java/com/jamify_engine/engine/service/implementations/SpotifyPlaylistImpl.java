@@ -137,9 +137,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
      * @return
      */
     private String refreshToken(Long jamifyUserId) {
-        // TODO
-        log.debug("TODO");
-        return "FAKETOKENFORNOW";
+        return userAccessTokenService.refreshAccessToken(jamifyUserId, this.getProviderName());
     }
 
     private List<String> retrieveUrisFromMusicIds(List<Long> musics, String providerAccessToken) {
