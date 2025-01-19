@@ -59,13 +59,14 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
             throw new AccessTokenNotFoundException("Access token not found for user: " + email + " and provider: " + provider);
         }
 
-        if (userAccessToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            log.debug("Access token expired for user {}. Refreshing...", email);
-            String refreshedToken = refreshAccessToken(email, provider);
-            userAccessToken.setAccessToken(refreshedToken);
-            userAccessToken.setExpiresAt(LocalDateTime.now().plusHours(1));
-            userAccessTokenRepository.save(userAccessToken);
-        }
+        // FIXME aled
+//        if (userAccessToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+//            log.debug("Access token expired for user {}. Refreshing...", email);
+//            String refreshedToken = refreshAccessToken(email, provider);
+//            userAccessToken.setAccessToken(refreshedToken);
+//            userAccessToken.setExpiresAt(LocalDateTime.now().plusHours(1));
+//            userAccessTokenRepository.save(userAccessToken);
+//        }
 
         return userAccessToken.getAccessToken();
     }
@@ -79,7 +80,7 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
      * @throws RuntimeException if the access token refresh fails
      */
     private String refreshAccessToken(String email, String provider) {
-        String refreshAccessTokenParams = "?provider=%s&email=%s";
+        String refreshAccessTokenParams = "/api/v1/auth/refresh-access-token?provider=%s&email=%s";
         String uri = String.format(refreshAccessTokenParams, provider, email);
 
         try {
@@ -95,11 +96,11 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
 
         } catch (WebClientResponseException e) {
             log.error("HTTP Error ({}) while refreshing access token: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw e;
         } catch (Exception e) {
             log.error("Error while refreshing access token: {}", e.getMessage());
+            throw e;
         }
-
-        return null;
     }
 
     /**
