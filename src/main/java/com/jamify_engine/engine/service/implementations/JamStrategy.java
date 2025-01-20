@@ -193,6 +193,7 @@ public abstract class JamStrategy implements IJamStrategy {
         UserEntity user = getUserAndCheckIfUserIsAllowedToLaunchAJam();
 
         JamDTO jamDTO = new JamDTO(
+                null,
                 jamVM.name(),
                 user.getId(),
                 JamStatusEnum.RUNNING,
