@@ -37,9 +37,6 @@ public class EngineSecurityConfig {
                         // these are secured with x-api-key because they are endpoint called by the uaa service
                         .requestMatchers("/api/v1/auth/access-token", "/api/v1/users/uaa/create", "/api/v1/users/uaa/email/**").permitAll()
                         .requestMatchers("/api/**").authenticated())
-
-                // Configure OAuth2 Resource Server to validate JWT tokens
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
                 .build();
     }
 
