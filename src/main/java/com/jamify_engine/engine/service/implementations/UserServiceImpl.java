@@ -11,7 +11,9 @@ import com.jamify_engine.engine.service.interfaces.UserService;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -103,7 +105,7 @@ public class UserServiceImpl implements UserService {
         }
 
         UserEntity userCorrespondingToEmail = Optional.ofNullable(userRepository
-                .findByEmail(userToUpdateEmail))
+                        .findByEmail(userToUpdateEmail))
                 .orElseThrow(() ->
                         new UserNotFoundException("User %s does not exist in database".formatted(userToUpdateEmail))
                 );
@@ -116,11 +118,21 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserEntity isCurrentUserAllowed(UserEntity userCorrespondingToEmail) {
+        String currentUserEmail;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        currentUserEmail = authentication.getPrincipal().toString();
 
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+            currentUserEmail = jwtAuthenticationToken.getToken().getClaimAsString("email");
+            if (currentUserEmail == null) {
+                throw new UnauthorizedException("Current user email is null");
+            }
+        }
+
+        String finalCurrentUserEmail = currentUserEmail;
         UserEntity currentUser = Optional.ofNullable(userRepository.findByEmail(currentUserEmail))
                 .orElseThrow(() ->
-                        new UserNotFoundException("Current user %s does not exist in database".formatted(currentUserEmail))
+                        new UserNotFoundException("Current user %s does not exist in database".formatted(finalCurrentUserEmail))
                 );
 
         if (!Objects.equals(currentUser.getId(), userCorrespondingToEmail.getId())) {

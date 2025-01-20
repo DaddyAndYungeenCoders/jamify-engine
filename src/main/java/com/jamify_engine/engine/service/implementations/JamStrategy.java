@@ -15,6 +15,7 @@ import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
+import com.jamify_engine.engine.security.authentication.JwtAuthentication;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
 import com.jamify_engine.engine.service.interfaces.MusicService;
 import com.jamify_engine.engine.service.interfaces.UserService;
@@ -22,7 +23,9 @@ import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -261,7 +264,11 @@ public abstract class JamStrategy implements IJamStrategy {
 
 
     protected String getCurrentUserEmail() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+        log.debug("Principal: %s".formatted(principal));
+        if (principal instanceof JwtAuthenticationToken) {
+            return ((JwtAuthenticationToken) principal).getToken().getClaimAsString("email");
+        }
         return principal.toString();
     }
 

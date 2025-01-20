@@ -9,9 +9,11 @@ import java.util.Collection;
 @Getter
 public class JwtAuthentication extends UsernamePasswordAuthenticationToken {
     private final String jwtToken;
+    private final String email;
 
-    public JwtAuthentication(Object principal, String jwtToken, Collection<? extends GrantedAuthority> authorities) {
+    public JwtAuthentication(Object principal, String jwtToken, Collection<? extends GrantedAuthority> authorities, String email) {
         super(principal, null, authorities);
         this.jwtToken = jwtToken;
+        this.email = email;
     }
 }
