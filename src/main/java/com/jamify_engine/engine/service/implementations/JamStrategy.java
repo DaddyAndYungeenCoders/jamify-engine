@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -191,17 +192,17 @@ public abstract class JamStrategy implements IJamStrategy {
     public JamDTO launchAJam(JamInstantLaunching jamVM) {
         UserEntity user = getUserAndCheckIfUserIsAllowedToLaunchAJam();
 
-        List<UserEntity> participants = Collections.singletonList(user);
+        JamDTO jamDTO = new JamDTO(
+                jamVM.name(),
+                user.getId(),
+                JamStatusEnum.RUNNING,
+                new HashSet<>(jamVM.themes()),
+                new HashSet<>(Collections.singletonList(user.getId())),
+                new HashSet<>(),
+                LocalDateTime.now()
+        );
 
-        JamEntity newJam = JamEntity.builder()
-                .host(user)
-                .hostId(user.getId())
-                .status(JamStatusEnum.RUNNING)
-                .schedStart(LocalDateTime.now())
-                .tags(new HashSet<>())
-                .messages(new HashSet<>())
-                .participants(new HashSet<>(participants))
-                .build();
+        JamEntity newJam = mapper.toEntity(jamDTO);
 
         user.setHasJamRunning(true);
 
@@ -214,8 +215,8 @@ public abstract class JamStrategy implements IJamStrategy {
         // Not returning directly newJam to be sure that the action has been done properly
         return updatedUser.jams()
                 .stream()
-                .filter(jamDTO ->
-                        JamStatusEnum.RUNNING.equals(jamDTO.status())).findFirst().orElseThrow(
+                .filter(dto ->
+                        JamStatusEnum.RUNNING.equals(dto.status())).findFirst().orElseThrow(
                         () -> new JamNotFoundException("Jam not found")
                 );
     }
