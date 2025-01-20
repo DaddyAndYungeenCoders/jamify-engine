@@ -28,3 +28,6 @@ config:
     url:
       base: http://localhost:8081
     jamify-engine-api-key: super-secret-dev-key
+  orchestrator:
+    url:
+      base: http://localhost:8083

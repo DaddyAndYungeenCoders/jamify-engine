@@ -3,6 +3,8 @@ package com.jamify_engine.engine.models.vms;
 import lombok.Value;
 import lombok.With;
 
+import java.util.Map;
+
 @Value
 @With
 public class PlaylistRequest {
@@ -10,5 +12,5 @@ public class PlaylistRequest {
     String providerAccessToken;
     Long jamifyUserId;
     String username;
-    Object requestBody;
+    Map<String, Object> requestBody;
 }

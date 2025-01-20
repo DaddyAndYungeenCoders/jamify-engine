@@ -71,7 +71,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
 
     @Override
     public String getProviderName() {
-        return "spotify";
+        return ProvidersEnum.SPOTIFY.getProvider();
     }
 
     @Override

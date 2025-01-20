@@ -23,8 +23,8 @@ public abstract class AbstractPlaylistStrategy<D extends PlaylistDTO> implements
     public D createAndPopulatePlaylist(PlaylistEndJobVM endJobVM) {
         D playlistDTO = createPlaylistInAGivenUserAccount(
                 endJobVM.getUserId(),
-                "RANDOMPLAYLISTNAME",
-                "RANDOMDESCRIPTION",
+                endJobVM.getData().getPlaylistName(),
+                endJobVM.getData().getPlaylistDescription(),
                 false
         );
 

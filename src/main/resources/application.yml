@@ -59,4 +59,4 @@ config:
         jamify-engine-api-key: ${JAMIFY_ENGINE_API_KEY}
     orchestrator:
         url:
-            base: http://localhost:8083
+            base: ${JAMIFY_ORCHESTRATOR_BASE_URL}
