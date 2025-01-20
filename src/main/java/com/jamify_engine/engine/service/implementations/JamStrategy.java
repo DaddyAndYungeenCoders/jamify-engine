@@ -264,11 +264,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
 
     protected String getCurrentUserEmail() {
-        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
-        log.debug("Principal: %s".formatted(principal));
-        if (principal instanceof JwtAuthenticationToken) {
-            return ((JwtAuthenticationToken) principal).getToken().getClaimAsString("email");
-        }
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return principal.toString();
     }
 

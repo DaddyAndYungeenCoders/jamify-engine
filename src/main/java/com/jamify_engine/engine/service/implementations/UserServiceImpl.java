@@ -118,21 +118,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserEntity isCurrentUserAllowed(UserEntity userCorrespondingToEmail) {
-        String currentUserEmail;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        currentUserEmail = authentication.getPrincipal().toString();
 
-        if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
-            currentUserEmail = jwtAuthenticationToken.getToken().getClaimAsString("email");
-            if (currentUserEmail == null) {
-                throw new UnauthorizedException("Current user email is null");
-            }
-        }
-
-        String finalCurrentUserEmail = currentUserEmail;
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         UserEntity currentUser = Optional.ofNullable(userRepository.findByEmail(currentUserEmail))
                 .orElseThrow(() ->
-                        new UserNotFoundException("Current user %s does not exist in database".formatted(finalCurrentUserEmail))
+                        new UserNotFoundException("Current user %s does not exist in database".formatted(currentUserEmail))
                 );
 
         if (!Objects.equals(currentUser.getId(), userCorrespondingToEmail.getId())) {

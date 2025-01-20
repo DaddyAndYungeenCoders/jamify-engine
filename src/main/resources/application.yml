@@ -27,6 +27,7 @@ spring:
             resourceserver:
                 jwt:
                     issuer-uri: ${JAMIFY_UAA_BASE_URL}
+                    jwk-set-uri: ${JAMIFY_UAA_BASE_URL}/oauth/.well-known/jwks.json
 
 security:
     jwt:
