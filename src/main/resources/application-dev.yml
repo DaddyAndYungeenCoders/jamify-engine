@@ -9,7 +9,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${config.uaa.url.base}
+          issuer-uri: https://jamify.daddyornot.xyz/jamify-uaa
+          jwk-set-uri: https://jamify.daddyornot.xyz/jamify-uaa/oauth/.well-known/jwks.json
 
   jpa:
     show-sql: true
@@ -26,7 +27,8 @@ gateway:
 config:
   uaa:
     url:
-      base: http://localhost:8081/api/v1
+#      base: http://localhost:8081/api/v1
+      base: https://jamify.daddyornot.xyz/jamify-uaa/api/v1
     jamify-engine-api-key: super-secret-dev-key
   orchestrator:
     url:

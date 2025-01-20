@@ -11,7 +11,9 @@ import com.jamify_engine.engine.service.interfaces.UserService;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -103,7 +105,7 @@ public class UserServiceImpl implements UserService {
         }
 
         UserEntity userCorrespondingToEmail = Optional.ofNullable(userRepository
-                .findByEmail(userToUpdateEmail))
+                        .findByEmail(userToUpdateEmail))
                 .orElseThrow(() ->
                         new UserNotFoundException("User %s does not exist in database".formatted(userToUpdateEmail))
                 );
