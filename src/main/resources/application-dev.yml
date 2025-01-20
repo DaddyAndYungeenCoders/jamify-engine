@@ -26,5 +26,8 @@ gateway:
 config:
   uaa:
     url:
-      base: http://localhost:8081
+      base: http://localhost:8081/api/v1
     jamify-engine-api-key: super-secret-dev-key
+  orchestrator:
+    url:
+      base: http://localhost:8083

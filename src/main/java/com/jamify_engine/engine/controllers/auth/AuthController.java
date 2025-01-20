@@ -42,4 +42,14 @@ public class AuthController {
         tokenService.saveAccessToken(userAccessToken);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/test/{provider}/{email}")
+    public ResponseEntity<Void> testRefreshAccessToken(@PathVariable String provider, @PathVariable String email) {
+        log.info("Received request to refresh access token for user: {} and provider: {}", email, provider);
+
+        tokenService.getAccessToken(email, provider);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

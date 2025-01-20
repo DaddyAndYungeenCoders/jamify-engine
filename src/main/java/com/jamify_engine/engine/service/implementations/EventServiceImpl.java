@@ -1,10 +1,11 @@
 package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
+import com.jamify_engine.engine.exceptions.common.NotFoundException;
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.models.entities.EventEntity;
-import com.jamify_engine.engine.models.entities.EventStatus;
+import com.jamify_engine.engine.models.enums.EventStatus;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.mappers.EventMapper;
 import com.jamify_engine.engine.repository.EventRepository;
@@ -15,6 +16,7 @@ import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,8 +49,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<EventEntity> findAllByHostId(long hostId) {
-        return eventRepository.findAllByHostId(hostId);
+    public List<EventDTO> findAllByHostId(long hostId) {
+        return eventRepository.findAllByHostId(hostId)
+                .stream()
+                .map(eventMapper::toDTO)
+                .toList();
     }
 
     @Override
@@ -66,6 +71,52 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toDTO(eventEntity);
     }
 
+    @Override
+    @Transactional
+    public void cancelEvent(Long eventId) {
+        EventEntity eventEntity = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id " + eventId + " not found."));
+
+        if (eventEntity.getStatus() != EventStatus.SCHEDULED) {
+            throw new BadRequestException("Event with id '" + eventId + "' is not cancelable.");
+        }
+
+        eventEntity.setStatus(EventStatus.CANCELLED);
+
+        // notify participants
+        // TODO
+
+        eventRepository.save(eventEntity);
+    }
+
+    @Override
+    @Transactional
+    public void leaveEvent(Long eventId) {
+        EventEntity eventEntity = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id " + eventId + " not found."));
+
+        UserEntity userEntity = getCurrentUser();
+
+        validateLeavingEvent(userEntity, eventEntity);
+
+        eventEntity.getParticipants().remove(userEntity);
+        eventRepository.save(eventEntity);
+    }
+
+    @Override
+    public List<EventDTO> findByStatus(EventStatus status) {
+        if (status == null || !Arrays.asList(EventStatus.values()).contains(status)) {
+            throw new BadRequestException("Status '" + status + "' is not valid.");
+        }
+        return eventRepository.findAllByStatus(status)
+                .orElseThrow(
+                        () -> new NotFoundException("No events found with status '" + status + "'.")
+                )
+                .stream()
+                .map(eventMapper::toDTO)
+                .toList();
+    }
+
     private void validateJoiningEvent(UserEntity userEntity, EventEntity eventEntity) {
         if (eventEntity.getStatus() == EventStatus.FINISHED) {
             throw new BadRequestException("Event has already finished.");
@@ -77,6 +128,16 @@ public class EventServiceImpl implements EventService {
 
         if (eventEntity.getParticipants().contains(userEntity)) {
             throw new BadRequestException("User is already a participant of this event.");
+        }
+    }
+
+    private void validateLeavingEvent(UserEntity userEntity, EventEntity eventEntity) {
+        if (eventEntity.getHost().equals(userEntity)) {
+            throw new BadRequestException("Host cannot leave the event.");
+        }
+
+        if (!eventEntity.getParticipants().contains(userEntity)) {
+            throw new BadRequestException("User is not a participant of this event.");
         }
     }
 
@@ -110,7 +171,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDTO> findAll() throws ExecutionControl.NotImplementedException {
+    public List<EventDTO> findAll() {
         return eventRepository.findAll()
                 .stream()
                 .map(eventMapper::toDTO)

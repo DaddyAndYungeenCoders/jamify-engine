@@ -1,6 +1,8 @@
 package com.jamify_engine.engine.exceptions;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
+import com.jamify_engine.engine.exceptions.common.NotFoundException;
+import com.jamify_engine.engine.exceptions.external.MaxRetriesExceededException;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.musics.MusicNotFoundException;
 import com.jamify_engine.engine.exceptions.security.AccessTokenNotFoundException;
@@ -54,5 +56,15 @@ public class Translator extends ResponseEntityExceptionHandler {
     @ExceptionHandler({MusicNotFoundException.class})
     public ResponseEntity<Object> handleMusicNotFound(final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({NotFoundException.class})
+    public ResponseEntity<Object> handleNotFoundException(final Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({MaxRetriesExceededException.class})
+    public ResponseEntity<Object> handleMaxRetriesExceeded(final Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

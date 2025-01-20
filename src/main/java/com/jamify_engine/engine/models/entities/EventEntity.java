@@ -1,11 +1,11 @@
 package com.jamify_engine.engine.models.entities;
 
+import com.jamify_engine.engine.models.enums.EventStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDateTime;
 import java.util.Set;

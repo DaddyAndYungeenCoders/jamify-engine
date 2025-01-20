@@ -1,148 +1,101 @@
 package com.jamify_engine.engine.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jamify_engine.engine.controllers.jam.JamController;
-import com.jamify_engine.engine.models.dto.MusicDTO;
-import com.jamify_engine.engine.models.entities.JamEntity;
-import com.jamify_engine.engine.models.entities.PlaylistEntity;
-import com.jamify_engine.engine.models.entities.UserEntity;
-import com.jamify_engine.engine.models.vms.JamInstantLaunching;
+import com.jamify_engine.engine.models.dto.JamDTO;
+import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
-import com.jamify_engine.engine.utils.TestsUtils;
-import jdk.jshell.spi.ExecutionControl;
+import com.jamify_engine.engine.utils.SecurityTestsUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(JamController.class)
-@Import(SecurityTestConfig.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
+@Import(SecurityTestConfig.class)
+@Sql(value = {"classpath:sql/jamControllerIntTestSqlScripts/populate_db.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = {"classpath:sql/jamControllerIntTestSqlScripts/flush_all.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 public class JamControllerIntTest {
-    private final Long TEST_MUSIC_ID = 2L;
-    private final Long TEST_JAM_ID = 2L;
+    // TODO more real integration tests one day (¬_¬ )
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private IJamStrategy mockedJamStrategy;
+    @Value("${config.uaa.jamify-engine-api-key}")
+    private String correctJamifyEngineApiKey;
+
+    @Autowired
+    private IJamStrategy jamStrategy;
 
     @BeforeEach
-    public void setup() throws ExecutionControl.NotImplementedException {
-        doNothing().when(mockedJamStrategy).joinJam(anyLong());
-        doNothing().when(mockedJamStrategy).leaveJam(anyLong());
-        doNothing().when(mockedJamStrategy).playMusic(anyLong(), anyLong());
-        when(mockedJamStrategy.getAllInQueue(anyLong())).thenReturn(buildQueue());
+    void setUp() {
+        SecurityContextHolder.getContext().setAuthentication(SecurityTestsUtils.mocktestUser1Authenticated());
     }
 
-    private List<MusicDTO> buildQueue() {
-        List<MusicDTO> musicDTOS = new ArrayList<>();
-        MusicDTO mockMusicContent = new MusicDTO(TEST_MUSIC_ID, "", "", "", "", "", "", new HashSet<>());
-        musicDTOS.add(mockMusicContent);
-        return musicDTOS;
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
-    @WithMockUser
-    public void shouldTryToJoinAJam() throws Exception {
-        // GIVEN
-        // WHEN
-        mockMvc.perform(put("/api/jams/join/{jamId}", TEST_JAM_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf()))
-                .andExpect(status().isOk());
-        // THEN
-        verify(mockedJamStrategy).joinJam(eq(TEST_JAM_ID));
-    }
+    void shouldGetAllJams() throws Exception {
+        // Given
+        // See populate_db.sql
 
-    @Test
-    @WithMockUser
-    public void shouldTryToLeaveAJam() throws Exception {
-        // GIVEN
-        // WHEN
-        mockMvc.perform(put("/api/jams/leave/{jamId}", TEST_JAM_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf()))
-                .andExpect(status().isOk());
-        // THEN
-        verify(mockedJamStrategy).leaveJam(eq(TEST_JAM_ID));
-    }
-
-    @Test
-    @WithMockUser
-    public void shouldTryToGetAllQueuedMusicsInAJam() throws Exception {
-        // GIVEN
-        List<MusicDTO> expectedResponse = buildQueue();
-
-        // WHEN
-        MvcResult result = mockMvc.perform(get("/api/jams/queue/{jamId}", TEST_JAM_ID)
-                        .with(csrf()))
+        // When
+        MvcResult result = mockMvc.perform(get("/api/v1/jams/running"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // THEN
-        verify(mockedJamStrategy).getAllInQueue(eq(TEST_JAM_ID));
-        String jsonResponse = result.getResponse().getContentAsString();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String expectedResponseAsString = objectMapper.writeValueAsString(expectedResponse);
-        Assertions.assertEquals(expectedResponseAsString, jsonResponse);
-    }
+        // Then
+        String content = result.getResponse().getContentAsString();
+        ObjectMapper mapper = new ObjectMapper();
 
-    @Test
-    @WithMockUser
-    public void shouldTryToPlayAMusicInAJam() throws Exception {
-        // GIVEN
-        // WHEN
-        mockMvc.perform(post("/api/jams/play/{musicId}/{jamId}", TEST_MUSIC_ID, TEST_JAM_ID)
-                        .with(csrf()))
-                .andExpect(status().isOk());
+        List<JamDTO> jams = mapper.readValue(
+                content,
+                mapper.getTypeFactory().constructCollectionType(List.class, JamDTO.class)
+        );
 
-        // THEN
-        verify(mockedJamStrategy).playMusic(eq(TEST_MUSIC_ID), eq(TEST_JAM_ID));
-    }
+        // Vérifications
+        Assertions.assertNotNull(jams);
+        Assertions.assertEquals(1, jams.size());
 
-    @Test
-    @WithMockUser
-    public void shouldLaunchAJam() throws Exception {
-        // GIVEN
-        Set<String> roles = new HashSet<>();
-        roles.add("USER");
-        UserEntity mockedUser = TestsUtils.buildUserEntity();
-        List<String> themes = new ArrayList<>();
-        themes.add("testTheme");
-        JamInstantLaunching jamVM = JamInstantLaunching.builder().name("chill").themes(themes).build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String requestBody = objectMapper.writeValueAsString(jamVM);
+        JamDTO runningJam = jams.get(0);
+        Assertions.assertEquals("Johns Rock Party", runningJam.name());
+        Assertions.assertEquals(JamStatusEnum.RUNNING, runningJam.status());
+        Assertions.assertEquals(1L, runningJam.hostId());
 
-        // WHEN
-        mockMvc.perform(post("/api/jams/launch")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)
-                        .with(csrf()))
-                .andExpect(status().isOk());
+        // Vérification des participants
+        Assertions.assertEquals(2, runningJam.participants().size());
+        Assertions.assertTrue(runningJam.participants().stream()
+                .anyMatch(participant -> participant == 1L)); // John
+        Assertions.assertTrue(runningJam.participants().stream()
+                .anyMatch(participant -> participant == 2L)); // Jane
 
-        // THEN
-        verify(mockedJamStrategy).launchAJam(jamVM);
+        // Vérification des tags
+        Set<String> expectedThemes = Set.of("Rock", "Pop");
+        Assertions.assertEquals(expectedThemes, new HashSet<>(runningJam.themes()));
+
+        // Vérification des messages
+        Assertions.assertEquals(3, runningJam.messages().size());
     }
 }

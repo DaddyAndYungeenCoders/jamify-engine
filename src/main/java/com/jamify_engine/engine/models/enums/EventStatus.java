@@ -1,4 +1,4 @@
-package com.jamify_engine.engine.models.entities;
+package com.jamify_engine.engine.models.enums;
 
 import lombok.Getter;
 

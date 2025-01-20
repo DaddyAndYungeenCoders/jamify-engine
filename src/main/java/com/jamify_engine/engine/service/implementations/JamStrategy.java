@@ -62,6 +62,7 @@ public abstract class JamStrategy implements IJamStrategy {
         specificPlay(music, jamDTO);
     }
 
+
     @Override
     public List<MusicDTO> getAllInQueue(Long jamId) throws ExecutionControl.NotImplementedException {
         throw new ExecutionControl.NotImplementedException("not yet");
@@ -105,7 +106,6 @@ public abstract class JamStrategy implements IJamStrategy {
 
         checkIfUserIsAllowedToLeaveAJam(currentUser, jamId);
 
-        // join
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam id %d is not corresponding to any known jam".formatted(jamId)));
 
         Set<UserEntity> jamParticipants = jam.getParticipants();
@@ -175,8 +175,13 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     @Override
-    public List<JamDTO> findAll() throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("not yet");
+    public List<JamDTO> findAll() {
+        return this.mapper.toDTO(this.jamRepository.findAll());
+    }
+
+    @Override
+    public List<JamDTO> findAllRunningJams() {
+        return this.mapper.toDTO(this.jamRepository.findAllByStatus(JamStatusEnum.RUNNING).orElseThrow(() -> new JamNotFoundException("No runnning jam found")));
     }
 
     @Override
@@ -208,7 +213,7 @@ public abstract class JamStrategy implements IJamStrategy {
                 .stream()
                 .filter(jamDTO ->
                         JamStatusEnum.RUNNING.equals(jamDTO.status())).findFirst().orElseThrow(
-                                () -> new JamNotFoundException("Jam not found")
+                        () -> new JamNotFoundException("Jam not found")
                 );
     }
 

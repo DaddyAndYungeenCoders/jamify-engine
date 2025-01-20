@@ -1,8 +1,8 @@
 package com.jamify_engine.engine.utils;
 
-import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.UserAccessTokenDto;
 import com.jamify_engine.engine.models.dto.UserDTO;
+import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.entities.AddressType;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.PlaylistEntity;
@@ -10,97 +10,18 @@ import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.jamify_engine.engine.utils.Constants.*;
 
 @Slf4j
 @Component
 public class TestsUtils {
-
-    public static Authentication mocktestUser1Authenticated() {
-        return new Authentication() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-            }
-
-            @Override
-            public Object getCredentials() {
-                return null;
-            }
-
-            @Override
-            public Object getDetails() {
-                return null;
-            }
-
-            @Override
-            public Object getPrincipal() {
-                return TEST_USER_EMAIL;
-            }
-
-            @Override
-            public boolean isAuthenticated() {
-                return true;
-            }
-
-            @Override
-            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
-            }
-
-            @Override
-            public String getName() {
-                return TEST_USER_EMAIL;
-            }
-        };
-    }
-
-    public static Authentication mocktestUser2Authenticated() {
-        return new Authentication() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-            }
-
-            @Override
-            public Object getCredentials() {
-                return null;
-            }
-
-            @Override
-            public Object getDetails() {
-                return null;
-            }
-
-            @Override
-            public Object getPrincipal() {
-                return TEST_USER_EMAIL_2;
-            }
-
-            @Override
-            public boolean isAuthenticated() {
-                return true;
-            }
-
-            @Override
-            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
-            }
-
-            @Override
-            public String getName() {
-                return TEST_USER_EMAIL_2;
-            }
-        };
-    }
 
     @PostConstruct
     public void init() {
