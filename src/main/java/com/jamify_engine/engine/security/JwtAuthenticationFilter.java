@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.security;
 
+import com.jamify_engine.engine.security.authentication.JwtAuthentication;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,8 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String username = jwtService.getUsernameFromToken(token);
                     Set<String> roles = jwtService.getRolesFromToken(token);
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(username, null,
+                    JwtAuthentication authentication =
+                            new JwtAuthentication(username, token,
                                     roles.stream().map(SimpleGrantedAuthority::new).toList());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
