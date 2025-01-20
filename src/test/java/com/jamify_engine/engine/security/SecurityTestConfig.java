@@ -3,7 +3,7 @@ package com.jamify_engine.engine.security;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import java.util.Set;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -16,7 +16,7 @@ public class SecurityTestConfig {
         JwtService mockJwtService = mock(JwtService.class);
         when(mockJwtService.validateToken(anyString())).thenReturn(true);
         when(mockJwtService.getUsernameFromToken(anyString())).thenReturn("test@test.com");
-        when(mockJwtService.getRolesFromToken(anyString())).thenReturn(Set.of("USER"));
+        when(mockJwtService.getRolesFromToken(anyString())).thenReturn(List.of("USER"));
         return mockJwtService;
     }
 }
