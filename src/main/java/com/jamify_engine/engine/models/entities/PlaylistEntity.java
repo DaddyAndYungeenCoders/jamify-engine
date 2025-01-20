@@ -24,17 +24,6 @@ public class PlaylistEntity {
     @JoinColumn(name = "author_id")
     private UserEntity author;
 
-    @Column(name = "playlist_name")
-    private String name;
-
     @Column(name = "playlist_like_number")
     private int like;
-
-    @ManyToMany
-    @JoinTable(
-            name = "playlist_music",
-            joinColumns = @JoinColumn(name = "playlist_id"),
-            inverseJoinColumns = @JoinColumn(name = "music_id")
-    )
-    private Set<MusicEntity> musics;
 }

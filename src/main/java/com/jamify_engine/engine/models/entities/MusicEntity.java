@@ -35,9 +35,6 @@ public class MusicEntity {
     @Column(name = "spotify_uri")
     private String spotifyUri;
 
-    @ManyToMany(mappedBy = "musics")
-    private Set<PlaylistEntity> playlists;
-
     @ManyToMany
     @JoinTable(
             name = "music_tag",
