@@ -24,6 +24,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${config.uaa.url.base}
+          jwk-set-uri: ${config.uaa.url.base}/oauth/.well-known/jwks.json
 
 security:
   jwt:
