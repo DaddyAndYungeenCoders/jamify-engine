@@ -5,7 +5,7 @@ import com.jamify_engine.engine.exceptions.common.NotFoundException;
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.models.entities.EventEntity;
-import com.jamify_engine.engine.models.entities.EventStatus;
+import com.jamify_engine.engine.models.enums.EventStatus;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.mappers.EventMapper;
 import com.jamify_engine.engine.repository.EventRepository;

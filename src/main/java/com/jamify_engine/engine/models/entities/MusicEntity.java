@@ -32,6 +32,8 @@ public class MusicEntity {
     private String tempo;
     @Column(name = "music_energy")
     private String energy;
+    @Column(name = "spotify_uri")
+    private String spotifyUri;
 
     @ManyToMany(mappedBy = "musics")
     private Set<PlaylistEntity> playlists;

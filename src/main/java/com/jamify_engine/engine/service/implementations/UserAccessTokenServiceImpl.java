@@ -20,7 +20,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * Service class for managing user access tokens.
@@ -82,7 +81,8 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
      * @return the refreshed access token
      * @throws RuntimeException if the access token refresh fails
      */
-    private String refreshAccessToken(String email, String provider) {
+    @Override
+    public String refreshAccessToken(String email, String provider) {
         String refreshAccessTokenParams = "/auth/refresh-access-token?provider=%s&email=%s";
         String uri = String.format(refreshAccessTokenParams, provider, email);
         String jwt = SecurityUtils.getCurrentUserJwt();
@@ -101,11 +101,17 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
 
         } catch (WebClientResponseException e) {
             log.error("HTTP Error ({}) while refreshing access token: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw e;
         } catch (Exception e) {
             log.error("Error while refreshing access token: {}", e.getMessage());
+            throw e;
         }
+    }
 
-        return null;
+    @Override
+    public String refreshAccessToken(Long jamifyUserId, String provider) {
+        String email = this.userRepository.findById(jamifyUserId).orElseThrow(() -> new UserNotFoundException("User with id %d does not exist".formatted(jamifyUserId))).getEmail();
+        return this.refreshAccessToken(email, provider);
     }
 
     /**

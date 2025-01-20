@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/jams")
+@RequestMapping("/api/v1/jams")
 @Slf4j
 @Tag(name = "Jam Management", description = "Endpoints for managing jam sessions")
 public class JamController extends CRUDController<JamDTO, IJamStrategy> {

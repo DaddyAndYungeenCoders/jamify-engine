@@ -1,7 +1,7 @@
 package com.jamify_engine.engine.models.dto.event;
 
 import com.jamify_engine.engine.models.entities.AddressType;
-import com.jamify_engine.engine.models.entities.EventStatus;
+import com.jamify_engine.engine.models.enums.EventStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
