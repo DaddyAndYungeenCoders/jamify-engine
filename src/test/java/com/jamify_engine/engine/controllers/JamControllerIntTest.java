@@ -62,7 +62,7 @@ public class JamControllerIntTest {
         // See populate_db.sql
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/jams/running"))
+        MvcResult result = mockMvc.perform(get("/api/v1/jams/running"))
                 .andExpect(status().isOk())
                 .andReturn();
 

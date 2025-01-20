@@ -66,7 +66,7 @@ public class JamControllerTest {
     public void shouldTryToJoinAJam() throws Exception {
         // GIVEN
         // WHEN
-        mockMvc.perform(put("/api/jams/join/{jamId}", TEST_JAM_ID)
+        mockMvc.perform(put("/api/v1/jams/join/{jamId}", TEST_JAM_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andExpect(status().isOk());
@@ -79,7 +79,7 @@ public class JamControllerTest {
     public void shouldTryToLeaveAJam() throws Exception {
         // GIVEN
         // WHEN
-        mockMvc.perform(put("/api/jams/leave/{jamId}", TEST_JAM_ID)
+        mockMvc.perform(put("/api/v1/jams/leave/{jamId}", TEST_JAM_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andExpect(status().isOk());
@@ -94,7 +94,7 @@ public class JamControllerTest {
         List<MusicDTO> expectedResponse = buildQueue();
 
         // WHEN
-        MvcResult result = mockMvc.perform(get("/api/jams/queue/{jamId}", TEST_JAM_ID)
+        MvcResult result = mockMvc.perform(get("/api/v1/jams/queue/{jamId}", TEST_JAM_ID)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -112,7 +112,7 @@ public class JamControllerTest {
     public void shouldTryToPlayAMusicInAJam() throws Exception {
         // GIVEN
         // WHEN
-        mockMvc.perform(post("/api/jams/play/{musicId}/{jamId}", TEST_MUSIC_ID, TEST_JAM_ID)
+        mockMvc.perform(post("/api/v1/jams/play/{musicId}/{jamId}", TEST_MUSIC_ID, TEST_JAM_ID)
                         .with(csrf()))
                 .andExpect(status().isOk());
 
@@ -134,7 +134,7 @@ public class JamControllerTest {
         String requestBody = objectMapper.writeValueAsString(jamVM);
 
         // WHEN
-        mockMvc.perform(post("/api/jams/launch")
+        mockMvc.perform(post("/api/v1/jams/launch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
                         .with(csrf()))

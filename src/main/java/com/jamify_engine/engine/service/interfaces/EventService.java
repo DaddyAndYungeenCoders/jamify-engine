@@ -2,7 +2,7 @@ package com.jamify_engine.engine.service.interfaces;
 
 import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
-import com.jamify_engine.engine.models.entities.EventStatus;
+import com.jamify_engine.engine.models.enums.EventStatus;
 import com.jamify_engine.engine.service.ServiceBasics;
 
 import java.util.List;
