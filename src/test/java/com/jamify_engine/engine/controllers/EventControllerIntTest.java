@@ -7,7 +7,7 @@ import com.jamify_engine.engine.models.dto.event.EventCreateDTO;
 import com.jamify_engine.engine.models.dto.event.EventDTO;
 import com.jamify_engine.engine.models.dto.event.EventParticipantDTO;
 import com.jamify_engine.engine.models.entities.EventEntity;
-import com.jamify_engine.engine.models.entities.EventStatus;
+import com.jamify_engine.engine.models.enums.EventStatus;
 import com.jamify_engine.engine.models.mappers.EventMapper;
 import com.jamify_engine.engine.security.SecurityTestConfig;
 import com.jamify_engine.engine.service.implementations.EventServiceImpl;

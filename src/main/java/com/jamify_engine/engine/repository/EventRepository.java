@@ -1,7 +1,7 @@
 package com.jamify_engine.engine.repository;
 
 import com.jamify_engine.engine.models.entities.EventEntity;
-import com.jamify_engine.engine.models.entities.EventStatus;
+import com.jamify_engine.engine.models.enums.EventStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
