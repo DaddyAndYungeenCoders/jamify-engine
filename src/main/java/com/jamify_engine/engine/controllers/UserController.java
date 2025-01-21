@@ -9,6 +9,7 @@ import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -53,4 +54,28 @@ public class UserController extends CRUDController<UserDTO, UserService> {
         return service.findByEmail(email);
     }
 
+    @Operation(summary = "Find a user by its provider id",
+            description = "Find a user by its provider id.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User found successfully."),
+                    @ApiResponse(responseCode = "404", description = "User not found.")
+            })
+    @GetMapping("/providerId/{providerId}")
+    public UserDTO findByUserProviderId(@PathVariable String providerId) {
+        log.info("[REST] get to find a user from provider id");
+        return service.findByUserProviderId(providerId);
+    }
+
+    @Operation(summary = "Find a user by email",
+            description = "Find a user by email in the UAA. Sent by the Jamify UAA.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User found successfully."),
+                    @ApiResponse(responseCode = "401", description = "Invalid API Key.")
+            })
+    @GetMapping("/me")
+    public UserDTO findByEmail() {
+        log.info("[REST] get to find a user from provider id");
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        return service.findByEmail(email);
+    }
 }
