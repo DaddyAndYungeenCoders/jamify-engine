@@ -1,17 +1,14 @@
 package com.jamify_engine.engine.service.implementations;
 
-import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.MusicDTO;
-import com.jamify_engine.engine.models.dto.UserDTO;
-import com.jamify_engine.engine.models.entities.JamEntity;
-import com.jamify_engine.engine.models.entities.UserAccessTokenEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.ProvidersEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.repository.JamRepository;
 import com.jamify_engine.engine.service.interfaces.MusicService;
+import com.jamify_engine.engine.service.interfaces.TagsService;
 import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
 import com.jamify_engine.engine.service.interfaces.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +32,11 @@ public class SpotifyJamStrategy extends JamStrategy {
                               JamRepository jamRepository,
                               JamMapper jamMapper,
                               MusicService musicService,
-                              MusicMapper musicMapper,
                               @Qualifier("spotifyServiceWebClient") WebClient spotifyWebClient1,
-                              UserAccessTokenService userAccessTokenService1) {
-        super(userService, jamRepository, jamMapper, musicService, musicMapper);
+                              UserAccessTokenService userAccessTokenService1,
+                              TagsService tagsService,
+                              MusicMapper musicMapper) {
+        super(userService, jamRepository, jamMapper, musicService, tagsService, musicMapper);
         spotifyWebClient = spotifyWebClient1;
         userAccessTokenService = userAccessTokenService1;
     }

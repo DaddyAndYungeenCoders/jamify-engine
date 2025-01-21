@@ -20,7 +20,7 @@ public class TagEntity {
     @Column(name = "tag_id")
     private Long id;
 
-    @Column(name = "tag_label")
+    @Column(name = "tag_label", unique = true)
     private String label;
 
     @ManyToMany(mappedBy = "tags")

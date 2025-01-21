@@ -3,6 +3,7 @@ package com.jamify_engine.engine.models.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import lombok.*;
 
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import java.util.Set;
 public record JamDTO(
         @Schema(description = "Jam Id", example = "1")
         @JsonProperty("id")
-        Long JamId,
+        @Nullable
+        Long jamId,
         @Schema(description = "Jam name", example = "Jam salut salut")
         String name,
         @Schema(description = "Jam description", example = "A jam to celebrate the release of the new album")
