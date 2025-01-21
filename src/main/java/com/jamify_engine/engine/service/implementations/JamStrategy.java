@@ -264,7 +264,14 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     protected JamEntity updateUserWithNewJam(UserEntity user, JamEntity jam) {
-        return jamRepository.save(jam);
+        JamEntity savedJam = jamRepository.save(jam);
+        user.setCurrentJam(savedJam);
+
+        if (userService.update(user.getId(), user) != null) {
+            return savedJam;
+        }
+
+        throw new IllegalArgumentException("Impossible to update the user.");
     }
 
 
