@@ -144,6 +144,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO findByUserProviderId(String providerId) {
+        UserEntity userEntity = userRepository.findByUserProviderId(providerId).orElseThrow(() -> new UserNotFoundException("User with providerId " + providerId + " not found"));
+        return userMapper.toDTO(userEntity);
+    }
+
+    @Override
     public List<UserDTO> findAll() {
         List<UserEntity> userEntities = userRepository.findAll();
         return userMapper.toDTOs(userEntities);

@@ -18,4 +18,6 @@ public interface UserService extends ServiceBasics<UserDTO> {
     UserDTO update(Long id, UserEntity user);
 
     Set<UserEntity> findAllEntitiesByIds(Set<Long> ids);
+
+    UserDTO findByUserProviderId(String providerId);
 }
