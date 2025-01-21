@@ -49,12 +49,6 @@ public class EngineSecurityConfig {
                 .build();
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/oauth/.well-known/jwks.json")
-                .build();
-    }
-
     /**
      * Creates a bean for the CORS configuration source.
      *
