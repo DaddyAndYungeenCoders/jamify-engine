@@ -4,7 +4,7 @@ DELETE FROM jam_tags;
 DELETE FROM jam_message;
 
 -- Reset user's current jam to null
-UPDATE users SET jam_id = NULL WHERE jam_id IS NOT NULL;
+UPDATE users SET current_jam_jam_id = NULL WHERE current_jam_jam_id IS NOT NULL;
 
 -- Then clean up main tables
 DELETE FROM jam;

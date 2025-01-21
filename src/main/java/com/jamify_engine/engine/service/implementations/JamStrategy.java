@@ -83,7 +83,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
         checkIfUserIsAllowedToJoinAJam(currentUser);
 
-        // join
+        //join
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam id %d is not corresponding to any known jam".formatted(jamId)));
 
         Set<UserEntity> jamParticipants = jam.getParticipants();
@@ -247,6 +247,8 @@ public abstract class JamStrategy implements IJamStrategy {
 
         currentUser.setHasJamRunning(false);
 
+        currentUser.setCurrentJam(null);
+
         userService.update(currentUser.getId(), currentUser);
     }
 
@@ -264,7 +266,14 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     protected JamEntity updateUserWithNewJam(UserEntity user, JamEntity jam) {
-        return jamRepository.save(jam);
+        JamEntity savedJam = jamRepository.save(jam);
+        user.setCurrentJam(savedJam);
+
+        if (userService.update(user.getId(), user) != null) {
+            return savedJam;
+        }
+
+        throw new IllegalArgumentException("Impossible to update the user.");
     }
 
 
