@@ -58,8 +58,7 @@ public class UserEntity {
     @OneToMany(mappedBy = "author")
     private Set<PlaylistEntity> playlists;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "jam_id")
+    @OneToOne(fetch = FetchType.EAGER)
     private JamEntity currentJam;
 
     @ManyToMany
