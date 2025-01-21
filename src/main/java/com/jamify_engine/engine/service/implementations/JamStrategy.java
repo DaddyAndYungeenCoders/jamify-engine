@@ -9,23 +9,22 @@ import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.MusicDTO;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
+import com.jamify_engine.engine.models.entities.TagEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
-import com.jamify_engine.engine.security.authentication.JwtAuthentication;
 import com.jamify_engine.engine.service.interfaces.IJamStrategy;
 import com.jamify_engine.engine.service.interfaces.MusicService;
+import com.jamify_engine.engine.service.interfaces.TagsService;
 import com.jamify_engine.engine.service.interfaces.UserService;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -44,10 +43,13 @@ public abstract class JamStrategy implements IJamStrategy {
     @Autowired
     protected final MusicService musicService;
 
+    @Autowired
+    protected final TagsService tagsService;
+
     protected final MusicMapper musicMapper;
 
     @Override
-    public void playMusic(Long musicId, Long jamId) throws ExecutionControl.NotImplementedException {
+    public void playMusic(Long musicId, Long jamId) {
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam with id %d could not be found".formatted(jamId)));
         Long currentUserId = getCurrentUser().getId();
 
@@ -150,15 +152,13 @@ public abstract class JamStrategy implements IJamStrategy {
                 .participants(new HashSet<>())
                 .build();
 
-        UserDTO updatedUser = updateUserWithNewJam(user, jamEntity);
+        JamEntity updatedEntity = updateUserWithNewJam(user, jamEntity);
 
-        if (updatedUser == null) {
+        if (updatedEntity == null) {
             throw new BadRequestException("Something went wrong while trying to update the user status");
         }
 
-        JamEntity savedEntity = jamRepository.save(jamEntity);
-
-        return mapper.toDTO(savedEntity);
+        return mapper.toDTO(updatedEntity);
     }
 
     @Override
@@ -191,33 +191,44 @@ public abstract class JamStrategy implements IJamStrategy {
     public JamDTO launchAJam(JamInstantLaunching jamVM) {
         UserEntity user = getUserAndCheckIfUserIsAllowedToLaunchAJam();
 
-        List<UserEntity> participants = Collections.singletonList(user);
+        Set<TagEntity> tags = new HashSet<>();
 
-        JamEntity newJam = JamEntity.builder()
-                .host(user)
-                .hostId(user.getId())
-                .status(JamStatusEnum.RUNNING)
-                .schedStart(LocalDateTime.now())
-                .tags(new HashSet<>())
-                .messages(new HashSet<>())
-                .participants(new HashSet<>(participants))
-                .build();
+        /**
+         * TODO discuss, we should think about giving the user a search input to set a tag for his jam.
+         */
+        for (String tagLabel: jamVM.themes()) {
+            Optional<TagEntity> tagEntity = tagsService.findByLabel(tagLabel);
+            if (tagEntity.isEmpty()) {
+                TagEntity tagToCreate = new TagEntity();
+                tagToCreate.setLabel(tagLabel);
+                TagEntity tag = tagsService.createNewTag(tagToCreate);
+                tags.add(tag);
+            } else {
+                tags.add(tagEntity.get());
+            }
+        }
+
+        JamEntity jamEntity = new JamEntity(
+                null,
+                user,
+                user.getId(),
+                jamVM.name(),
+                LocalDateTime.now(),
+                JamStatusEnum.RUNNING,
+                tags,
+                null,
+                null
+        );
 
         user.setHasJamRunning(true);
 
-        UserDTO updatedUser = updateUserWithNewJam(user, newJam);
+        JamEntity updatedJamEntity = updateUserWithNewJam(user, jamEntity);
 
-        if (updatedUser == null) {
+        if (updatedJamEntity == null) {
             throw new BadRequestException("Something went wrong while trying to update the user status");
         }
 
-        // Not returning directly newJam to be sure that the action has been done properly
-        return updatedUser.jams()
-                .stream()
-                .filter(jamDTO ->
-                        JamStatusEnum.RUNNING.equals(jamDTO.status())).findFirst().orElseThrow(
-                        () -> new JamNotFoundException("Jam not found")
-                );
+        return mapper.toDTO(updatedJamEntity);
     }
 
     @Override
@@ -252,14 +263,8 @@ public abstract class JamStrategy implements IJamStrategy {
         return userService.findEntityByEmail(currentUserEmail);
     }
 
-    protected UserDTO updateUserWithNewJam(UserEntity user, JamEntity jam) {
-        Set<JamEntity> hostedJams = user.getHostedJams();
-
-        hostedJams.add(jam);
-
-        user.setHostedJams(hostedJams);
-
-        return userService.update(user.getId(), user);
+    protected JamEntity updateUserWithNewJam(UserEntity user, JamEntity jam) {
+        return jamRepository.save(jam);
     }
 
 

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface JamMapper {
     @Mapping(target = "themes", source = "tags", qualifiedByName = "mapTagsToThemes")
+    @Mapping(target = "jamId", source = "id")
     @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
     @Mapping(target = "hostId", source = "host", qualifiedByName = "mapHost")
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
@@ -101,6 +102,10 @@ public interface JamMapper {
 
     @Named("mapMessages")
     default Set<Long> mapMessages(Set<JamMessageEntity> messageEntities) {
+        if (messageEntities == null) {
+            return new HashSet<>();
+        }
+
         return messageEntities.stream()
                 .map(JamMessageEntity::getId)
                 .collect(Collectors.toSet());
@@ -113,6 +118,10 @@ public interface JamMapper {
 
     @Named("mapParticipants")
     default Set<Long> mapParticipants(Set<UserEntity> participants) {
+        if (participants == null) {
+            return new HashSet<>();
+        }
+
         return participants.stream()
                 .map(UserEntity::getId)
                 .collect(Collectors.toSet());

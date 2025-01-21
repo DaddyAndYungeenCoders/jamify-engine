@@ -15,6 +15,7 @@ import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
 import com.jamify_engine.engine.service.implementations.SpotifyJamStrategy;
 import com.jamify_engine.engine.service.interfaces.MusicService;
+import com.jamify_engine.engine.service.interfaces.TagsService;
 import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
 import com.jamify_engine.engine.service.interfaces.UserService;
 import com.jamify_engine.engine.utils.TestsUtils;
@@ -61,6 +62,8 @@ class SpotifyJamStrategyTest {
     private MusicService musicService;
     @Mock
     private MusicMapper musicMapper;
+    @Mock
+    private TagsService tagsService;
 
     private SpotifyJamStrategy spotifyJamStrategy;
     private static final String TEST_EMAIL = "test@test.com";
@@ -71,7 +74,7 @@ class SpotifyJamStrategyTest {
 
     @BeforeEach
     void setUp() {
-        spotifyJamStrategy = new SpotifyJamStrategy(userService, jamRepository, jamMapper, musicService, musicMapper, spotifyWebClient, userAccessTokenService);
+        spotifyJamStrategy = new SpotifyJamStrategy(userService, jamRepository, jamMapper, musicService, spotifyWebClient, userAccessTokenService, tagsService, musicMapper);
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(TEST_EMAIL);
@@ -268,7 +271,8 @@ class SpotifyJamStrategyTest {
                 musicService,
                 musicMapper,
                 spotifyWebClient,
-                userAccessTokenService
+                userAccessTokenService,
+                tagsService
         ));
 
         Long musicId = 1L;
@@ -368,8 +372,9 @@ class SpotifyJamStrategyTest {
                                           MusicService musicService,
                                           MusicMapper musicMapper,
                                           WebClient spotifyWebClient,
-                                          UserAccessTokenService userAccessTokenService) {
-            super(userService, jamRepository, jamMapper, musicService, musicMapper, spotifyWebClient, userAccessTokenService);
+                                          UserAccessTokenService userAccessTokenService,
+                                          TagsService tagsService) {
+            super(userService, jamRepository, jamMapper, musicService, spotifyWebClient, userAccessTokenService, tagsService, musicMapper);
         }
 
         @Override
