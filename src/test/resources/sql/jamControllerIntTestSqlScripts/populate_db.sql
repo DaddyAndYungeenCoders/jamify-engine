@@ -14,11 +14,11 @@ ALTER SEQUENCE users_user_id_seq RESTART WITH 1;
 ALTER SEQUENCE jam_message_jam_message_id_seq RESTART WITH 1;
 
 -- Create test users first
-INSERT INTO users (user_id, user_email, user_name, user_provider, user_provider_id, user_img_url, user_has_jam_running, user_country)
+INSERT INTO users (user_id, user_email, user_name, user_provider, user_provider_id, user_img_url, user_has_jam_running, user_country, current_jam_jam_id)
 VALUES
-    (1, 'john.doe@test.com', 'John Doe', 'LOCAL', 'local_1', 'https://placeholder.com/john.jpg', false, 'FR'),
-    (2, 'jane.smith@test.com', 'Jane Smith', 'GOOGLE', 'google_1', 'https://placeholder.com/jane.jpg', true, 'US'),
-    (3, 'bob.wilson@test.com', 'Bob Wilson', 'SPOTIFY', 'spotify_1', 'https://placeholder.com/bob.jpg', false, 'UK');
+    (1, 'john.doe@test.com', 'John Doe', 'LOCAL', 'local_1', 'https://placeholder.com/john.jpg', false, 'FR', null),
+    (2, 'jane.smith@test.com', 'Jane Smith', 'GOOGLE', 'google_1', 'https://placeholder.com/jane.jpg', true, 'US', null),
+    (3, 'bob.wilson@test.com', 'Bob Wilson', 'SPOTIFY', 'spotify_1', 'https://placeholder.com/bob.jpg', false, 'UK', null);
 
 -- Add user roles
 INSERT INTO user_roles (user_id, user_role)
@@ -42,6 +42,10 @@ VALUES
     (2, 2, 'Jazz Evening', '2025-01-20 19:00:00', 'SCHEDULED'),
     (3, 3, 'Classical Sunday', '2025-01-13 15:00:00', 'STOPPED'),
     (4, 1, 'Pop Night', '2025-01-15 21:00:00', 'CANCELED');
+
+UPDATE users
+SET current_jam_jam_id = 1
+WHERE user_id = 1;
 
 -- Now we can safely add participants
 INSERT INTO jam_participant (jam_id, user_id)
@@ -70,6 +74,3 @@ VALUES
     (3, 2, 2, 'Jazz session starting next week', '2025-01-14 10:00:00'),
     (4, 3, 3, 'Thanks everyone for coming', '2025-01-13 17:00:00'),
     (5, 1, 1, 'What should we play next?', '2025-01-14 20:15:00');
-
--- Update current jam for users in running jams
-UPDATE users SET jam_id = 1 WHERE user_id IN (1, 2);

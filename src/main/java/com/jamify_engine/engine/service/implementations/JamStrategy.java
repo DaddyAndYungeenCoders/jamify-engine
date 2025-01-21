@@ -247,6 +247,8 @@ public abstract class JamStrategy implements IJamStrategy {
 
         currentUser.setHasJamRunning(false);
 
+        currentUser.setCurrentJam(null);
+
         userService.update(currentUser.getId(), currentUser);
     }
 
