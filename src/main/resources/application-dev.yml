@@ -12,6 +12,7 @@ spring:
           issuer-uri: https://jamify.daddyornot.xyz/jamify-uaa
           jwk-set-uri: https://jamify.daddyornot.xyz/jamify-uaa/oauth/.well-known/jwks.json
 
+
   jpa:
     show-sql: true
 
