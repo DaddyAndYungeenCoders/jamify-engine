@@ -66,15 +66,15 @@ public class UserController extends CRUDController<UserDTO, UserService> {
         return service.findByUserProviderId(providerId);
     }
 
-    @Operation(summary = "Find a user by email",
-            description = "Find a user by email in the UAA. Sent by the Jamify UAA.",
+    @Operation(summary = "Retrieve the current logged in user info",
+            description = "Retrieve the current logged in user info",
             responses = {
                     @ApiResponse(responseCode = "200", description = "User found successfully."),
-                    @ApiResponse(responseCode = "401", description = "Invalid API Key.")
+                    @ApiResponse(responseCode = "404", description = "User not found")
             })
     @GetMapping("/me")
     public UserDTO findByEmail() {
-        log.info("[REST] get to find a user from provider id");
+        log.info("[REST] get to retrieve the current logged in user infos");
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         return service.findByEmail(email);
     }
