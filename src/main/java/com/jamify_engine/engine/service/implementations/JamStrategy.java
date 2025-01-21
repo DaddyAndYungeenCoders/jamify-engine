@@ -83,7 +83,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
         checkIfUserIsAllowedToJoinAJam(currentUser);
 
-        // join
+        //join
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam id %d is not corresponding to any known jam".formatted(jamId)));
 
         Set<UserEntity> jamParticipants = jam.getParticipants();
