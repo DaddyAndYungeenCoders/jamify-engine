@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,6 +42,18 @@ public abstract class JamStrategy implements IJamStrategy {
     protected final MusicMapper musicMapper;
 
     protected final ParticipantService participantService;
+
+    @Override
+    public void playMusic() {
+        UserEntity currentUser = getCurrentUser();
+        Long currentUserId = currentUser.getId();
+        Set<JamParticipantEntity> jamParticipantEntity = participantService.getFromUserId(currentUserId);
+        JamParticipantEntity jamParticipant = jamParticipantEntity.stream().filter(
+                jamParticipantEntity1 -> jamParticipantEntity1.isHost() && JamStatusEnum.RUNNING.equals(jamParticipantEntity1.getJam().getStatus())
+        ).findFirst().orElseThrow(() -> new UnauthorizedException("The current user is not allowed to launch a music in a jam since he is not hosting any jam."));
+
+        specificPlay(currentUser, jamParticipant.getJam());
+    }
 
     @Override
     public void playMusic(Long musicId, Long jamId) {
@@ -321,5 +334,15 @@ public abstract class JamStrategy implements IJamStrategy {
         return userService.findAllEntitiesByIds(jam.participants());
     }
 
+    /**
+     * Get all non-host users in a jam
+     * @param jam the jam we want the follower of
+     * @return a set of the users in a jam
+     */
+    protected Set<UserEntity> getAllUsersInAJam(JamEntity jam) {
+        return jam.getParticipants().stream().filter(jamParticipantEntity -> !jamParticipantEntity.isHost()).map(JamParticipantEntity::getUser).collect(Collectors.toSet());
+    }
+
     protected abstract void specificPlay(MusicDTO musicDTO, JamDTO jamDTO);
+    protected abstract void specificPlay(UserEntity host, JamEntity jam);
 }

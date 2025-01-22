@@ -10,5 +10,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpotifySearchFullRequestResponse {
-    List<SpotifyTrackDTO> items;
+    SpotifyTrackDTO item;
 }

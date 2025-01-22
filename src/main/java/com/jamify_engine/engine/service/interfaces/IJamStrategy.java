@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface IJamStrategy extends ServiceBasics<JamDTO> {
     void playMusic(Long musicId, Long jamId) throws ExecutionControl.NotImplementedException;
+    void playMusic();
     List<MusicDTO> getAllInQueue(Long jamId) throws ExecutionControl.NotImplementedException;
     void joinJam(Long jamId);
     void leaveJam(Long jamId);

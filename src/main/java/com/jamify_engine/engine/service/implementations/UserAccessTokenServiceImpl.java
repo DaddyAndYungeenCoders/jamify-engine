@@ -20,6 +20,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 
 /**
  * Service class for managing user access tokens.
@@ -59,7 +62,7 @@ public class UserAccessTokenServiceImpl implements UserAccessTokenService {
             throw new AccessTokenNotFoundException("Access token not found for user: " + email + " and provider: " + provider);
         }
 
-        if (userAccessToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (userAccessToken.getExpiresAt().isBefore(ChronoLocalDateTime.from(ZonedDateTime.now(ZoneId.of("Europe/Paris"))))) {
             log.debug("Access token expired for user {}. Refreshing...", email);
             String refreshedToken = refreshAccessToken(email, provider);
             if (refreshedToken == null) {
