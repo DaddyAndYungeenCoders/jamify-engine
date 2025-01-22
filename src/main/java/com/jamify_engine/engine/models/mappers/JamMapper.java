@@ -1,5 +1,6 @@
 package com.jamify_engine.engine.models.mappers;
 
+import com.jamify_engine.engine.exceptions.user.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.entities.*;
 import org.mapstruct.Mapper;
@@ -18,6 +19,7 @@ public interface JamMapper {
     @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "userProviderId", source = "participants", qualifiedByName = "setUserProviderId")
     JamDTO toDTO(JamEntity entity);
 
     @Mapping(source = "id", target = "jamId")
@@ -25,6 +27,7 @@ public interface JamMapper {
     @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "userProviderId", source = "participants", qualifiedByName = "setUserProviderId")
     List<JamDTO> toDTO(List<JamEntity> entities);
 
     @Mapping(target = "id", ignore = true)
@@ -102,5 +105,14 @@ public interface JamMapper {
         return participants.stream()
                 .map(participant -> participant.getUser().getId())
                 .collect(Collectors.toSet());
+    }
+
+    @Named("setUserProviderId")
+    default String setHostProviderIdFromParticipants(Set<JamParticipantEntity> jamParticipantEntitySet) {
+        return jamParticipantEntitySet.stream()
+                .filter(JamParticipantEntity::isHost)
+                .findFirst()
+                .map(jamParticipant -> jamParticipant.getUser().getUserProviderId())
+                .orElseThrow(() -> new UserNotFoundException("The jam has no host :("));
     }
 }

@@ -55,18 +55,15 @@ public class TestsUtils {
                 "img.png",
                 null,
                 false,
-                jams,
                 playlists,
-                null,
                 new HashSet<>(),
-                new HashSet<>()
+                new HashSet<>(),
+                null
         );
     }
 
     public static JamEntity buildJamEntity(JamStatusEnum jamStatusEnum) {
         return new JamEntity(
-                1L,
-                buildUserEntity(),
                 1L,
                 JAM_NAME_TEST,
                 LocalDateTime.of(2024, 12, 31, 12, 0),

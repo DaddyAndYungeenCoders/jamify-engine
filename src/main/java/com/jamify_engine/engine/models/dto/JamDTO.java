@@ -28,5 +28,8 @@ public record JamDTO(
         @Schema(description = "Jam messages. A voir si on laisse comme ca avec le save côté chat microservice", example = "[1, 2, 3]")
         Set<Long> messages,
         @Schema(description = "Jam scheduled date", example = "2021-08-01T12:00:00")
-        LocalDateTime scheduledDate
+        LocalDateTime scheduledDate,
+        @Schema(description = "Jam host userProviderId")
+        @JsonProperty("host_user_provider_id")
+        String userProviderId
 ) implements Serializable {}
