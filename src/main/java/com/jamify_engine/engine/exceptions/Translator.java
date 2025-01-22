@@ -45,12 +45,12 @@ public class Translator extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({UnauthorizedException.class})
     public ResponseEntity<Object> handleUnauthorizedException(final Exception e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({InvalidApiKeyException.class})
     public ResponseEntity<Object> handleInvalidApiKeyException(final Exception e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({MusicNotFoundException.class})

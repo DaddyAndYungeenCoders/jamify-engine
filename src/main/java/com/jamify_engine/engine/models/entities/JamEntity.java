@@ -42,6 +42,6 @@ public class JamEntity {
     @OneToMany(mappedBy = "jam")
     private Set<JamMessageEntity> messages;
 
-    @OneToMany(mappedBy = "jam")
+    @OneToMany(mappedBy = "jam", fetch = FetchType.EAGER)
     private Set<JamParticipantEntity> participants;
 }
