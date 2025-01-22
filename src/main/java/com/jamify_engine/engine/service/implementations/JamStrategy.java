@@ -2,24 +2,16 @@ package com.jamify_engine.engine.service.implementations;
 
 import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
-import com.jamify_engine.engine.exceptions.security.JamAlreadyRunning;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
-import com.jamify_engine.engine.exceptions.security.UserNotFoundException;
 import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.MusicDTO;
-import com.jamify_engine.engine.models.dto.UserDTO;
-import com.jamify_engine.engine.models.entities.JamEntity;
-import com.jamify_engine.engine.models.entities.TagEntity;
-import com.jamify_engine.engine.models.entities.UserEntity;
+import com.jamify_engine.engine.models.entities.*;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
 import com.jamify_engine.engine.repository.JamRepository;
-import com.jamify_engine.engine.service.interfaces.IJamStrategy;
-import com.jamify_engine.engine.service.interfaces.MusicService;
-import com.jamify_engine.engine.service.interfaces.TagsService;
-import com.jamify_engine.engine.service.interfaces.UserService;
+import com.jamify_engine.engine.service.interfaces.*;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,12 +40,14 @@ public abstract class JamStrategy implements IJamStrategy {
 
     protected final MusicMapper musicMapper;
 
+    protected final ParticipantService participantService;
+
     @Override
     public void playMusic(Long musicId, Long jamId) {
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam with id %d could not be found".formatted(jamId)));
         Long currentUserId = getCurrentUser().getId();
 
-        if (!Objects.equals(jam.getHost().getId(), currentUserId) || !JamStatusEnum.RUNNING.equals(jam.getStatus())) {
+        if (!Objects.equals(getHostIdFromJam(jam), currentUserId) || !JamStatusEnum.RUNNING.equals(jam.getStatus())) {
             throw new UnauthorizedException(currentUserId);
         }
 
@@ -86,19 +80,11 @@ public abstract class JamStrategy implements IJamStrategy {
         //join
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam id %d is not corresponding to any known jam".formatted(jamId)));
 
-        Set<UserEntity> jamParticipants = jam.getParticipants();
-
-        jamParticipants.add(currentUser);
-
-        jam.setParticipants(jamParticipants);
-
-        JamEntity savedJam = jamRepository.save(jam);
-
-        currentUser.setCurrentJam(savedJam);
+        updateJamParticipation(currentUser, jam, false);
 
         userService.update(currentUser.getId(), currentUser);
 
-        notify(savedJam.getHostId(), "User joining", currentUser.getName());
+        notify(getHostIdFromJam(jam), "User joining", currentUser.getName());
     }
 
     @Override
@@ -113,23 +99,24 @@ public abstract class JamStrategy implements IJamStrategy {
 
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam id %d is not corresponding to any known jam".formatted(jamId)));
 
-        Set<UserEntity> jamParticipants = jam.getParticipants();
+        Set<JamParticipantEntity> jamParticipants = jam.getParticipants();
 
-        jamParticipants.removeIf(participant -> Objects.equals(participant.getId(), currentUser.getId()));
+        jamParticipants.removeIf(participant -> Objects.equals(participant.getId().getUserId(), currentUser.getId()));
 
         jam.setParticipants(jamParticipants);
 
         JamEntity savedJam = jamRepository.save(jam);
 
-        currentUser.setCurrentJam(null);
-
         userService.update(currentUser.getId(), currentUser);
 
-        notify(savedJam.getHostId(), "User leaving", currentUser.getName());
+        notify(getHostIdFromJam(savedJam), "User leaving", currentUser.getName());
     }
 
+    // FIXME implement ??!!
     @Override
     public JamDTO create(JamDTO entityToCreate) {
+        return entityToCreate;
+        /*
         String email = getCurrentUserEmail();
 
         if (Objects.equals(userService.findByEmail(email), null)) {
@@ -142,7 +129,6 @@ public abstract class JamStrategy implements IJamStrategy {
             throw new JamAlreadyRunning(user.getName());
         }
 
-        // FIXME use mapper
         JamEntity jamEntity = JamEntity.builder()
                 .hostId(user.getId())
                 .status(entityToCreate.status())
@@ -152,13 +138,14 @@ public abstract class JamStrategy implements IJamStrategy {
                 .participants(new HashSet<>())
                 .build();
 
-        JamEntity updatedEntity = updateUserWithNewJam(user, jamEntity);
+        JamEntity updatedEntity = updateJamParticipation(user, jamEntity);
 
         if (updatedEntity == null) {
             throw new BadRequestException("Something went wrong while trying to update the user status");
         }
 
         return mapper.toDTO(updatedEntity);
+        */
     }
 
     @Override
@@ -210,19 +197,15 @@ public abstract class JamStrategy implements IJamStrategy {
 
         JamEntity jamEntity = new JamEntity(
                 null,
-                user,
-                user.getId(),
                 jamVM.name(),
                 LocalDateTime.now(),
                 JamStatusEnum.RUNNING,
                 tags,
-                null,
-                null
+                new HashSet<>(),
+                new HashSet<>()
         );
 
-        user.setHasJamRunning(true);
-
-        JamEntity updatedJamEntity = updateUserWithNewJam(user, jamEntity);
+        JamEntity updatedJamEntity = updateJamParticipation(user, jamEntity, true);
 
         if (updatedJamEntity == null) {
             throw new BadRequestException("Something went wrong while trying to update the user status");
@@ -237,7 +220,9 @@ public abstract class JamStrategy implements IJamStrategy {
         String currentUserEmail = getCurrentUserEmail();
         UserEntity currentUser = userService.findEntityByEmail(currentUserEmail);
 
-        if (!Objects.equals(jam.getHost().getId(), currentUser.getId())) {
+        if (!Objects.equals(
+                getHostIdFromJam(jam),
+                currentUser.getId())) {
             throw new UnauthorizedException("The user with id %d is not authorized to stop the jam with id %d!");
         }
 
@@ -245,19 +230,23 @@ public abstract class JamStrategy implements IJamStrategy {
 
         jamRepository.save(jam);
 
-        currentUser.setHasJamRunning(false);
-
-        currentUser.setCurrentJam(null);
-
         userService.update(currentUser.getId(), currentUser);
     }
 
     @Override
     public JamEntity findRunningJamForUser() {
         UserEntity currentUser = getCurrentUser();
-        return jamRepository.findFirstByHost_IdAndStatus(currentUser.getId(), JamStatusEnum.RUNNING).orElseThrow(
+        return jamRepository.findFirstByStatusAndParticipantUserId(JamStatusEnum.RUNNING, currentUser.getId()).orElseThrow(
                 () -> new JamNotFoundException("The host %d has no jam running".formatted(currentUser.getId()))
         );
+    }
+
+    protected Long getHostIdFromJam(JamEntity jam) {
+        return jam.getParticipants().stream().filter(
+                        JamParticipantEntity::isHost
+                ).findFirst().orElseThrow(() -> new IllegalArgumentException("Jam seems to have no host :("))
+                .getId()
+                .getUserId();
     }
 
     protected UserEntity getCurrentUser() {
@@ -265,15 +254,23 @@ public abstract class JamStrategy implements IJamStrategy {
         return userService.findEntityByEmail(currentUserEmail);
     }
 
-    protected JamEntity updateUserWithNewJam(UserEntity user, JamEntity jam) {
+    protected JamEntity updateJamParticipation(UserEntity user, JamEntity jam, boolean isHost) {
         JamEntity savedJam = jamRepository.save(jam);
-        user.setCurrentJam(savedJam);
 
-        if (userService.update(user.getId(), user) != null) {
-            return savedJam;
-        }
+        JamParticipantEntity participant = new JamParticipantEntity();
+        participant.setJam(savedJam);
+        participant.setUser(user);
+        participant.setHost(isHost);
 
-        throw new IllegalArgumentException("Impossible to update the user.");
+        JamParticipantId jamParticipantId = new JamParticipantId();
+        jamParticipantId.setUserId(user.getId());
+        jamParticipantId.setJamId(savedJam.getId());
+
+        participant.setId(jamParticipantId);
+
+        participantService.createJamParticipant(participant);
+
+        return savedJam;
     }
 
 
@@ -284,13 +281,12 @@ public abstract class JamStrategy implements IJamStrategy {
 
     protected UserEntity getUserAndCheckIfUserIsAllowedToLaunchAJam() {
         UserEntity user = getCurrentUser();
+        Set<JamParticipantEntity> participantEntities = participantService.getFromUserId(user.getId());
 
-        if (Objects.equals(user, null)) {
-            throw new UserNotFoundException(user.getEmail());
-        }
-
-        if (user.isHasJamRunning()) {
-            throw new JamAlreadyRunning(user.getName());
+        for (JamParticipantEntity participant: participantEntities) {
+            if (JamStatusEnum.RUNNING.equals(participant.getJam().getStatus())) {
+                throw new UnauthorizedException("User already has a running jam");
+            }
         }
 
         return user;
@@ -302,14 +298,14 @@ public abstract class JamStrategy implements IJamStrategy {
             throw new UnauthorizedException("Unable to join a jam: the user %s is already hosting a jam.".formatted(user.getEmail()));
         }
         // Refusing if user is already listening to a jam
-        if (user.getCurrentJam() != null && JamStatusEnum.RUNNING.equals(user.getCurrentJam().getStatus())) {
+        if (user.getJams() != null && user.getJams().stream().anyMatch(jam -> jam.getJam().getStatus() == JamStatusEnum.RUNNING)) {
             throw new UnauthorizedException("Unable to join a jam: the user %s is already listening to a jam.".formatted(user.getEmail()));
         }
     }
 
     protected void checkIfUserIsAllowedToLeaveAJam(UserEntity user, Long jamId) {
         // Refusing if user is in the jam
-        if (!(user.getCurrentJam() != null && Objects.equals(user.getCurrentJam().getId(), jamId))) {
+        if (!(user.getJams() != null && user.getJams().stream().anyMatch(participation -> Objects.equals(participation.getId().getJamId(), jamId)))) {
             throw new UnauthorizedException("Unable to leave the jam: the user %s is not listening to this jam.".formatted(user.getEmail()));
         }
     }

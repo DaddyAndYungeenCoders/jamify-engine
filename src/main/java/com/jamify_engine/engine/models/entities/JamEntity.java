@@ -12,6 +12,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 @Table(name = "jam")
 public class JamEntity {
@@ -19,13 +20,6 @@ public class JamEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "jam_id")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id", insertable = false, updatable = false)
-    private UserEntity host;
-
-    @Column(name = "host_id")
-    private Long hostId;
 
     @Column(name = "jam_name")
     private String name;
@@ -48,11 +42,6 @@ public class JamEntity {
     @OneToMany(mappedBy = "jam")
     private Set<JamMessageEntity> messages;
 
-    @ManyToMany
-    @JoinTable(
-            name = "jam_participant",
-            joinColumns = @JoinColumn(name = "jam_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<UserEntity> participants;
+    @OneToMany(mappedBy = "jam")
+    private Set<JamParticipantEntity> participants;
 }
