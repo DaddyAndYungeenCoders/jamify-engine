@@ -334,8 +334,13 @@ public abstract class JamStrategy implements IJamStrategy {
         return userService.findAllEntitiesByIds(jam.participants());
     }
 
+    /**
+     * Get all non-host users in a jam
+     * @param jam the jam we want the follower of
+     * @return a set of the users in a jam
+     */
     protected Set<UserEntity> getAllUsersInAJam(JamEntity jam) {
-        return jam.getParticipants().stream().map(JamParticipantEntity::getUser).collect(Collectors.toSet());
+        return jam.getParticipants().stream().filter(jamParticipantEntity -> !jamParticipantEntity.isHost()).map(JamParticipantEntity::getUser).collect(Collectors.toSet());
     }
 
     protected abstract void specificPlay(MusicDTO musicDTO, JamDTO jamDTO);

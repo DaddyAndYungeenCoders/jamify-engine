@@ -150,7 +150,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
         return isrcs.stream()
                 .map(isrc -> {
                     try {
-                        return getSpotifyUriFromISRC(isrc, providerAccessToken).getTracks().getItems().getFirst().getUri();
+                        return getSpotifyUriFromISRC(isrc, providerAccessToken).getTracks().getItem().getUri();
                     } catch (MusicNotFoundException ex) {
                         log.error("There was an error while trying to find the music with isrc {}", isrc);
                         return null;
