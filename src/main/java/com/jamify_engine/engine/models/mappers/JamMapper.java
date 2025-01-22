@@ -1,10 +1,7 @@
 package com.jamify_engine.engine.models.mappers;
 
 import com.jamify_engine.engine.models.dto.JamDTO;
-import com.jamify_engine.engine.models.entities.JamEntity;
-import com.jamify_engine.engine.models.entities.JamMessageEntity;
-import com.jamify_engine.engine.models.entities.TagEntity;
-import com.jamify_engine.engine.models.entities.UserEntity;
+import com.jamify_engine.engine.models.entities.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -16,35 +13,30 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface JamMapper {
+    @Mapping(source = "id", target = "jamId")
     @Mapping(target = "themes", source = "tags", qualifiedByName = "mapTagsToThemes")
-    @Mapping(target = "jamId", source = "id")
     @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
-    @Mapping(target = "hostId", source = "host", qualifiedByName = "mapHost")
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
     @Mapping(target = "status", source = "status")
     JamDTO toDTO(JamEntity entity);
 
+    @Mapping(source = "id", target = "jamId")
     @Mapping(target = "themes", source = "tags", qualifiedByName = "mapTagsToThemes")
     @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
-    @Mapping(target = "hostId", source = "host", qualifiedByName = "mapHost")
     @Mapping(target = "messages", source = "messages", qualifiedByName = "mapMessages")
     @Mapping(target = "status", source = "status")
     List<JamDTO> toDTO(List<JamEntity> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "host", ignore = true)
-    @Mapping(target = "hostId", source = "hostId")
     @Mapping(target = "tags", expression = "java(mapThemesToTags(dto.themes()))")
-    @Mapping(target = "participants", expression = "java(mapParticipantIds(dto.participants()))")
+    @Mapping(target = "participants", ignore = true)
     @Mapping(target = "messages", expression = "java(mapMessageIds(dto.messages()))")
     @Mapping(source = "scheduledDate", target = "schedStart")
     JamEntity toEntity(JamDTO dto);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "host", ignore = true)
-    @Mapping(target = "hostId", source = "hostId")
     @Mapping(target = "tags", expression = "java(mapThemesToTags(dto.themes()))")
-    @Mapping(target = "participants", expression = "java(mapParticipantIds(dto.participants()))")
+    @Mapping(target = "participants", ignore = true)
     @Mapping(target = "messages", expression = "java(mapMessageIds(dto.messages()))")
     @Mapping(source = "scheduledDate", target = "schedStart")
     List<JamEntity> toEntity(List<JamDTO> dto);
@@ -60,20 +52,6 @@ public interface JamMapper {
                     TagEntity tag = new TagEntity();
                     tag.setLabel(theme);
                     return tag;
-                })
-                .collect(Collectors.toSet());
-    }
-
-    @Named("mapParticipantIds")
-    default Set<UserEntity> mapParticipantIds(Set<Long> participantIds) {
-        if (participantIds == null) {
-            return new HashSet<>();
-        }
-        return participantIds.stream()
-                .map(id -> {
-                    UserEntity user = new UserEntity();
-                    user.setId(id);
-                    return user;
                 })
                 .collect(Collectors.toSet());
     }
@@ -117,13 +95,12 @@ public interface JamMapper {
     }
 
     @Named("mapParticipants")
-    default Set<Long> mapParticipants(Set<UserEntity> participants) {
+    default Set<Long> mapParticipantsToIds(Set<JamParticipantEntity> participants) {
         if (participants == null) {
             return new HashSet<>();
         }
-
         return participants.stream()
-                .map(UserEntity::getId)
+                .map(participant -> participant.getUser().getId())
                 .collect(Collectors.toSet());
     }
 }

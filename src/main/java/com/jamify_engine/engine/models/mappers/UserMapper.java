@@ -4,6 +4,7 @@ import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.UserDTO;
 import com.jamify_engine.engine.models.dto.event.EventParticipantDTO;
 import com.jamify_engine.engine.models.entities.JamEntity;
+import com.jamify_engine.engine.models.entities.JamParticipantEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,10 +25,10 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "accessToken", ignore = true)
     @Mapping(target = "playlists", ignore = true)
-    @Mapping(target = "hostedJams", source = "jams", qualifiedByName = "mapJamsDTOToEntity")
+    @Mapping(target = "jams", ignore = true)
     UserEntity toEntity(UserDTO userDTO);
 
-    @Mapping(target = "jams", source = "hostedJams", qualifiedByName = "mapJamsEntitiesToDTO")
+    @Mapping(target = "jams", source = "jams", qualifiedByName = "mapJams")
     UserDTO toDTO(UserEntity userEntity);
 
     List<UserEntity> toEntities(List<UserDTO> userDTOs);
@@ -36,24 +37,18 @@ public interface UserMapper {
 
     void updateEntityFromDto(UserDTO userDTO, @MappingTarget UserEntity userEntity);
 
-    @Named("mapJamsDTOToEntity")
-    default Set<JamEntity> mapJamsDTOToEntity(List<JamDTO> jams) {
-        Set<JamEntity> result = new HashSet<>();
-
-        for (JamDTO jam : jams) {
-            result.add(JAM_MAPPER.toEntity(jam));
-        }
-
-        return result;
-    }
-
-    @Named("mapJamsEntitiesToDTO")
-    default List<JamDTO> mapJamsEntitiesToDTO(Set<JamEntity> jamEntities) {
+    @Named("mapJams")
+    default List<JamDTO> mapJamParticipationToLongs(Set<JamParticipantEntity> jamParticipantEntitySet) {
         List<JamDTO> result = new ArrayList<>();
 
-        for (JamEntity jam : jamEntities) {
-            result.add(JAM_MAPPER.toDTO(jam));
+        if (jamParticipantEntitySet == null) {
+            return new ArrayList<>();
         }
+
+        jamParticipantEntitySet.forEach(participation ->
+                result.add(JAM_MAPPER.toDTO(participation.getJam()))
+        );
+
         return result;
     }
 }

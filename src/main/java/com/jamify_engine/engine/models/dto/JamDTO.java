@@ -19,8 +19,6 @@ public record JamDTO(
         Long jamId,
         @Schema(description = "Jam name", example = "Jam salut salut")
         String name,
-        @Schema(description = "Jam description", example = "A jam to celebrate the release of the new album")
-        Long hostId,
         @Schema(description = "Jam status", example = "RUNNING", $schema = "JamStatusEnum")
         JamStatusEnum status,
         @Schema(description = "Jam themes", example = "['rap', 'hip-hop']")

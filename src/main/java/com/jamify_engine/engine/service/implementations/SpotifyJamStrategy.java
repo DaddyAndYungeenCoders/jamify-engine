@@ -7,10 +7,7 @@ import com.jamify_engine.engine.models.enums.ProvidersEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.repository.JamRepository;
-import com.jamify_engine.engine.service.interfaces.MusicService;
-import com.jamify_engine.engine.service.interfaces.TagsService;
-import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
-import com.jamify_engine.engine.service.interfaces.UserService;
+import com.jamify_engine.engine.service.interfaces.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,8 +32,9 @@ public class SpotifyJamStrategy extends JamStrategy {
                               @Qualifier("spotifyServiceWebClient") WebClient spotifyWebClient1,
                               UserAccessTokenService userAccessTokenService1,
                               TagsService tagsService,
-                              MusicMapper musicMapper) {
-        super(userService, jamRepository, jamMapper, musicService, tagsService, musicMapper);
+                              MusicMapper musicMapper,
+                              ParticipantService participantService1 ) {
+        super(userService, jamRepository, jamMapper, musicService, tagsService, musicMapper, participantService1);
         spotifyWebClient = spotifyWebClient1;
         userAccessTokenService = userAccessTokenService1;
     }

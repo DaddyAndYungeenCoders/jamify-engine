@@ -3,10 +3,7 @@ package com.jamify_engine.engine.models.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jdk.jfr.Event;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.Set;
@@ -14,6 +11,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
@@ -49,17 +47,15 @@ public class UserEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserAccessTokenEntity accessToken;
 
+    /**
+     * @deprecated use user.jams with a filter on status running instead
+     */
+    @Deprecated(forRemoval = true)
     @Column(name = "user_has_jam_running")
     private boolean hasJamRunning;
 
-    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<JamEntity> hostedJams;
-
     @OneToMany(mappedBy = "author")
     private Set<PlaylistEntity> playlists;
-
-    @OneToOne(fetch = FetchType.EAGER)
-    private JamEntity currentJam;
 
     @ManyToMany
     @JoinTable(
@@ -68,6 +64,9 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<EventEntity> events;
+
+    @OneToMany(mappedBy = "user")
+    private Set<JamParticipantEntity> jams;
 
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventEntity> hostedEvents;
