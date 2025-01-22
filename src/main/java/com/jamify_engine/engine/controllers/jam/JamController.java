@@ -95,6 +95,21 @@ public class JamController extends CRUDController<JamDTO, IJamStrategy> {
     }
 
     @Operation(
+            summary = "Play music in a jam without added parameters",
+            description = "Broadcasts a specific music track in a jam session",
+            responses = {
+                    @ApiResponse(responseCode = "404", description = "The requested jam was not found"),
+                    @ApiResponse(responseCode = "200", description = "Music successfully started playing")
+            }
+    )
+    @PostMapping("/play")
+    ResponseEntity<Boolean> playMusicForCurrentJamHost() {
+        log.info("[REST CALL] - Playing the music for the presumed host");
+        service.playMusic();
+        return ResponseEntity.ok(true);
+    }
+
+    @Operation(
             summary = "Launch a jam session",
             description = "Makes a jam joinable by updating its status and the host status",
             responses = {
