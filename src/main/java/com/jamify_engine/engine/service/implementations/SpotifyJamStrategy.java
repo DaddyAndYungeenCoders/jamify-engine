@@ -35,8 +35,9 @@ public class SpotifyJamStrategy extends JamStrategy {
                               UserAccessTokenService userAccessTokenService1,
                               TagsService tagsService,
                               MusicMapper musicMapper,
-                              ParticipantService participantService1) {
-        super(userService, jamRepository, jamMapper, musicService, tagsService, musicMapper, participantService1);
+                              ParticipantService participantService1,
+                              InternalNotificationService internalNotificationService) {
+        super(userService, jamRepository, jamMapper, musicService, tagsService, musicMapper, participantService1, internalNotificationService);
         spotifyWebClient = spotifyWebClient1;
         userAccessTokenService = userAccessTokenService1;
     }
