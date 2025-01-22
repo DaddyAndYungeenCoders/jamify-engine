@@ -99,17 +99,15 @@ public abstract class JamStrategy implements IJamStrategy {
 
         JamEntity jam = jamRepository.findById(jamId).orElseThrow(() -> new JamNotFoundException("The jam id %d is not corresponding to any known jam".formatted(jamId)));
 
-        Set<JamParticipantEntity> jamParticipants = jam.getParticipants();
+        JamParticipantEntity jamParticipantEntity = participantService.getFromUserId(
+                        currentUser.getId())
+                .stream()
+                .filter(jamParticipation -> Objects.equals(jamParticipation.getJam().getId(), jamId))
+                .findFirst().orElseThrow(() -> new JamNotFoundException("The jam was not found"));
 
-        jamParticipants.removeIf(participant -> Objects.equals(participant.getId().getUserId(), currentUser.getId()));
+        participantService.deleteJamParticipant(jamParticipantEntity);
 
-        jam.setParticipants(jamParticipants);
-
-        JamEntity savedJam = jamRepository.save(jam);
-
-        userService.update(currentUser.getId(), currentUser);
-
-        notify(getHostIdFromJam(savedJam), "User leaving", currentUser.getName());
+        notify(getHostIdFromJam(jam), "User leaving", currentUser.getName());
     }
 
     // FIXME implement ??!!
@@ -205,13 +203,13 @@ public abstract class JamStrategy implements IJamStrategy {
                 new HashSet<>()
         );
 
-        JamEntity updatedJamEntity = updateJamParticipation(user, jamEntity, true);
+        JamParticipantEntity jamParticipantEntity = updateJamParticipation(user, jamEntity, true);
 
-        if (updatedJamEntity == null) {
+        if (jamParticipantEntity == null) {
             throw new BadRequestException("Something went wrong while trying to update the user status");
         }
 
-        return mapper.toDTO(updatedJamEntity);
+        return mapper.toDTO(jamParticipantEntity.getJam());
     }
 
     @Override
@@ -254,9 +252,11 @@ public abstract class JamStrategy implements IJamStrategy {
         return userService.findEntityByEmail(currentUserEmail);
     }
 
-    protected JamEntity updateJamParticipation(UserEntity user, JamEntity jam, boolean isHost) {
+    protected JamParticipantEntity updateJamParticipation(UserEntity user, JamEntity jam, boolean isHost) {
+        // Sauvegarde du jam
         JamEntity savedJam = jamRepository.save(jam);
 
+        // Création du participant
         JamParticipantEntity participant = new JamParticipantEntity();
         participant.setJam(savedJam);
         participant.setUser(user);
@@ -265,12 +265,14 @@ public abstract class JamStrategy implements IJamStrategy {
         JamParticipantId jamParticipantId = new JamParticipantId();
         jamParticipantId.setUserId(user.getId());
         jamParticipantId.setJamId(savedJam.getId());
-
         participant.setId(jamParticipantId);
 
-        participantService.createJamParticipant(participant);
+        // Mise à jour du Set participants côté JamEntity
+        // (important pour que la liste ne soit plus vide en mémoire)
+        savedJam.getParticipants().add(participant);
 
-        return savedJam;
+        // Sauvegarde du participant
+        return participantService.createJamParticipant(participant);
     }
 
 
