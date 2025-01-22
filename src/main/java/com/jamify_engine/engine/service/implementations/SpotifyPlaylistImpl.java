@@ -5,9 +5,13 @@ import com.jamify_engine.engine.exceptions.musics.MusicNotFoundException;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
 import com.jamify_engine.engine.models.dto.external.spotify.SpotifySearchResultDTO;
 import com.jamify_engine.engine.models.dto.playlists.SpotifyPlaylistDTO;
+import com.jamify_engine.engine.models.entities.PlaylistEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.ProvidersEnum;
+import com.jamify_engine.engine.models.mappers.PlaylistMapper;
+import com.jamify_engine.engine.models.mappers.SpotifyPlaylistMapper;
 import com.jamify_engine.engine.models.vms.PlaylistRequest;
+import com.jamify_engine.engine.repository.PlaylistRepository;
 import com.jamify_engine.engine.service.interfaces.MusicService;
 import com.jamify_engine.engine.service.interfaces.UserAccessTokenService;
 import com.jamify_engine.engine.service.interfaces.UserService;
@@ -34,8 +38,10 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
     public SpotifyPlaylistImpl(@Qualifier("spotifyServiceWebClient") WebClient spotifyWebClient,
                                UserAccessTokenService userAccessTokenService,
                                UserService userService,
-                               MusicService musicService) {
-        super(userAccessTokenService, ProvidersEnum.SPOTIFY.getProvider(), userService);
+                               MusicService musicService,
+                               PlaylistRepository playlistRepository,
+                               PlaylistMapper<SpotifyPlaylistDTO, PlaylistEntity> spotifyPlaylistMapper) {
+        super(userAccessTokenService, ProvidersEnum.SPOTIFY.getProvider(), userService, playlistRepository, spotifyPlaylistMapper);
         this.webClient = spotifyWebClient;
         this.musicService = musicService;
     }
@@ -48,7 +54,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
     }
 
     @Override
-    public SpotifyPlaylistDTO addMusicsToPlaylist(String playlistId, List<Long> musics, String providerAccessToken) {
+    public Mono<SpotifyPlaylistDTO> addMusicsToPlaylist(String playlistId, List<Long> musics, String providerAccessToken) {
         String uri = "/playlists/%s/tracks".formatted(playlistId);
 
         List<String> musics_uri = retrieveUrisFromMusicIds(musics, providerAccessToken);
@@ -65,8 +71,12 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
                 .retrieve()
                 .bodyToMono(SpotifyPlaylistDTO.class)
                 .doOnSuccess(response -> log.info("Musics have been added in the playlist {} through Spotify, response was {}", playlistId, response))
-                .doOnError(exception -> log.error("Error while trying to add musics to a playlist through Spotify, message was: \n {}", exception.getMessage()))
-                .block();
+                .doOnError(exception -> log.error("Error while trying to add musics to a playlist through Spotify, message was: \n {}", exception.getMessage()));
+    }
+
+    @Override
+    public PlaylistEntity persistPlaylist(SpotifyPlaylistDTO playlistDTO) {
+        return playlistRepository.save(playlistMapper.toEntity(playlistDTO));
     }
 
     @Override
