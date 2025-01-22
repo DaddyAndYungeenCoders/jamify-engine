@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"id", "email"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
@@ -71,16 +71,6 @@ public class UserEntity {
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventEntity> hostedEvents;
 
-
-/* FIXME remove comments and create badge entity (com.jamify_engine.engine.models.entities.BadgeEntity)
-    @ManyToMany
-    @JoinTable(
-            name = "badge_detention",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "badge_id")
-    )
-    private Set<BadgeEntity> badges;
- */
 }
 
 // TODO: Un user ici avec les infos de l'app (jam, event etc...) et un user_uaa avec les infos de l'uaa (email, role etc...) ?
