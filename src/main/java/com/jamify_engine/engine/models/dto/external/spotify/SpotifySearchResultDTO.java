@@ -8,5 +8,5 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpotifySearchResultDTO {
-    SpotifySearchFullRequestResponse tracks;
+    SpotifySearchFullRequestResponseWithItems tracks;
 }

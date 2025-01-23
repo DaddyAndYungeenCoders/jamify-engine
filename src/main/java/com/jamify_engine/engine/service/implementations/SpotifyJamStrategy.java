@@ -4,7 +4,6 @@ import com.jamify_engine.engine.exceptions.common.BadRequestException;
 import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.MusicDTO;
 import com.jamify_engine.engine.models.dto.external.spotify.SpotifySearchFullRequestResponse;
-import com.jamify_engine.engine.models.dto.external.spotify.SpotifySearchFullRequestResponseWithItems;
 import com.jamify_engine.engine.models.entities.JamEntity;
 import com.jamify_engine.engine.models.entities.UserEntity;
 import com.jamify_engine.engine.models.enums.ProvidersEnum;
@@ -69,11 +68,11 @@ public class SpotifyJamStrategy extends JamStrategy {
     protected void specificPlay(UserEntity host, JamEntity jam) {
         String hostAccessToken = userAccessTokenService.getAccessToken(host.getEmail(), ProvidersEnum.SPOTIFY.getProvider());
         String getCurrentlyPlayingSongForGivenUserUri = "/me/player/currently-playing";
-        SpotifySearchFullRequestResponseWithItems currentlyPlayingSong = spotifyWebClient.get()
+        SpotifySearchFullRequestResponse currentlyPlayingSong = spotifyWebClient.get()
                 .uri(getCurrentlyPlayingSongForGivenUserUri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer %s".formatted(hostAccessToken))
                 .retrieve()
-                .bodyToMono(SpotifySearchFullRequestResponseWithItems.class)
+                .bodyToMono(SpotifySearchFullRequestResponse.class)
                 .doOnError(response -> log.error("SPOTIFY WEB CLIENT ERROR: {}", response.getMessage()))
                 .doOnSuccess(response -> log.info("SPOTIFY WEB CLIENT SUCCESS -> launched a music {}", response))
                 .block();
@@ -82,11 +81,11 @@ public class SpotifyJamStrategy extends JamStrategy {
             throw new BadRequestException("The requested song could not be found by spotify API");
         }
 
-        if (currentlyPlayingSong.getItems() == null) {
+        if (currentlyPlayingSong.getItem() == null) {
             throw new BadRequestException("The requested song could not be found by spotify API");
         }
 
-        String spotifyUri = currentlyPlayingSong.getItems().getFirst().getUri();
+        String spotifyUri = currentlyPlayingSong.getItem().getUri();
 
         Set<String> accessTokens = new HashSet<>();
         for (UserEntity user : getAllUsersInAJam(jam)) {
