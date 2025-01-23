@@ -28,8 +28,9 @@ gateway:
 config:
   uaa:
     url:
-      base: http://localhost:8081/api/v1
-#      base: https://jamify.daddyornot.xyz/jamify-uaa/api/v1
+      base: http://localhost:8081
+      refresh-access-token: ${config.uaa.url.base}/api/v1/auth/refresh-access-token
+    #      base: https://jamify.daddyornot.xyz/jamify-uaa/api/v1
     jamify-engine-api-key: super-secret-dev-key
   orchestrator:
     url:

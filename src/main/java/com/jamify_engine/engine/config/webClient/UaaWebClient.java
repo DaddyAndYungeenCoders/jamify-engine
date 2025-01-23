@@ -22,7 +22,7 @@ public class UaaWebClient {
     /**
      * Base URL for UAA.
      */
-    @Value("${config.uaa.url.base}")
+    @Value("${config.uaa.url.refresh-access-token}")
     private String uaaUrl;
 
     /**
