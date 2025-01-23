@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -114,7 +115,10 @@ public class SpotifyJamStrategy extends JamStrategy {
                 ))
                 .retrieve()
                 .toBodilessEntity()
-                .doOnError(response -> log.error("SPOTIFY WEB CLIENT ERROR: {}", response))
+                .onErrorResume(response -> {
+                    log.error("SPOTIFY WEB CLIENT ERROR: {}", response.getMessage());
+                    return Mono.empty();
+                })
                 .doOnSuccess(response -> log.info("SPOTIFY WEB CLIENT SUCCESS -> launched a music {}", response))
                 .block();
     }
