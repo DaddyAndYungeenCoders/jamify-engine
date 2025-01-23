@@ -97,6 +97,11 @@ public class SpotifyJamStrategy extends JamStrategy {
 
     protected void playMusicFromSpotifyUri(String spotifyUri, String accessToken) {
         log.info("REQUESTED SPOTIFY URI FOR TRACK: {}", spotifyUri);
+        log.info("REQUEST BODY FOR SPOTIFY PLAY: {}", Map.of(
+                "offset", Map.of("position", 0),
+                "uris", List.of(spotifyUri),
+                "position_ms", 0
+        ));
         String targetUri = "/me/player/play";
 
         spotifyWebClient.put()
