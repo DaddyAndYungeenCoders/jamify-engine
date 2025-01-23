@@ -12,6 +12,6 @@ import java.util.UUID;
 @Setter
 public class PlaylistEndJobVM {
     UUID id;
-    Long userId;
+    String userId;
     PlaylistEndJobPayloadVM data;
 }

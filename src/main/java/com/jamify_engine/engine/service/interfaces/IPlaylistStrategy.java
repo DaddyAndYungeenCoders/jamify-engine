@@ -8,7 +8,7 @@ import java.util.List;
 public interface IPlaylistStrategy<D extends PlaylistDTO> {
     D createAndPopulatePlaylist(PlaylistEndJobVM endJobVM);
 
-    D createPlaylistInAGivenUserAccount(Long jamifyUserId, String playlistName, String playlistDescription, boolean ispublic);
+    D createPlaylistInAGivenUserAccount(String userProviderId, String playlistName, String playlistDescription, boolean ispublic);
 
     D addMusicsToPlaylist(String playlistId, List<Long> musics, String providerAccessToken);
 
