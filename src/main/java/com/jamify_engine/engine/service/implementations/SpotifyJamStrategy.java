@@ -106,7 +106,7 @@ public class SpotifyJamStrategy extends JamStrategy {
         body.put("offset", offset);
         body.put("position_ms", 0);
 
-        spotifyWebClient.post()
+        spotifyWebClient.put()
                 .uri(targetUri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer %s".formatted(accessToken))
                 .bodyValue(body)
