@@ -198,7 +198,7 @@ public abstract class JamStrategy implements IJamStrategy {
         /**
          * TODO discuss, we should think about giving the user a search input to set a tag for his jam.
          */
-        for (String tagLabel: jamVM.themes()) {
+        for (String tagLabel : jamVM.themes()) {
             Optional<TagEntity> tagEntity = tagsService.findByLabel(tagLabel);
             if (tagEntity.isEmpty()) {
                 TagEntity tagToCreate = new TagEntity();
@@ -310,7 +310,7 @@ public abstract class JamStrategy implements IJamStrategy {
         UserEntity user = getCurrentUser();
         Set<JamParticipantEntity> participantEntities = participantService.getFromUserId(user.getId());
 
-        for (JamParticipantEntity participant: participantEntities) {
+        for (JamParticipantEntity participant : participantEntities) {
             if (JamStatusEnum.RUNNING.equals(participant.getJam().getStatus())) {
                 throw new UnauthorizedException("User already has a running jam");
             }
@@ -339,12 +339,13 @@ public abstract class JamStrategy implements IJamStrategy {
 
     protected void notify(String userProviderId, String type, String message) {
         NotificationVM notification = NotificationVM.builder()
-                        .destId(userProviderId)
-                                .content(message)
-                                        .metadata(
-                                                CustomMetadata.builder().objectId("jam:%s".formatted(type)).build()
-                                        )
-                        .build();
+                .destId(userProviderId)
+                .title(type)
+                .content(message)
+                .metadata(
+                        CustomMetadata.builder().objectId("jam:%s".formatted(type)).build()
+                )
+                .build();
         log.debug("Notifying the user %s about %s, notification type: %s".formatted(userProviderId, type, message));
         internalNotificationService.sendNotification(notification);
     }
@@ -355,6 +356,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
     /**
      * Get all non-host users in a jam
+     *
      * @param jam the jam we want the follower of
      * @return a set of the users in a jam
      */
@@ -363,5 +365,6 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     protected abstract void specificPlay(MusicDTO musicDTO, JamDTO jamDTO);
+
     protected abstract void specificPlay(UserEntity host, JamEntity jam);
 }
