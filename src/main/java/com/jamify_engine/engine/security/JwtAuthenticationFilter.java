@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().matches(".*(/api/v1/auth/access-token|/api/v1/users/uaa/create|/api/v1/users/uaa/email/).*")) {
+        if (request.getRequestURI().matches(".*(/api/v1/auth/access-token|/api/v1/users/uaa/create|/api/v1/users/uaa/email/|/api/v1/playlist/generated).*")) {
             filterChain.doFilter(request, response);
             return;
         }
