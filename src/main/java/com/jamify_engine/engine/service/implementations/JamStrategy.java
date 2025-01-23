@@ -5,11 +5,13 @@ import com.jamify_engine.engine.exceptions.jam.JamNotFoundException;
 import com.jamify_engine.engine.exceptions.security.UnauthorizedException;
 import com.jamify_engine.engine.models.dto.JamDTO;
 import com.jamify_engine.engine.models.dto.MusicDTO;
+import com.jamify_engine.engine.models.dto.notifications.CustomMetadata;
 import com.jamify_engine.engine.models.entities.*;
 import com.jamify_engine.engine.models.enums.JamStatusEnum;
 import com.jamify_engine.engine.models.mappers.JamMapper;
 import com.jamify_engine.engine.models.mappers.MusicMapper;
 import com.jamify_engine.engine.models.vms.JamInstantLaunching;
+import com.jamify_engine.engine.models.vms.NotificationVM;
 import com.jamify_engine.engine.repository.JamRepository;
 import com.jamify_engine.engine.service.interfaces.*;
 import jdk.jshell.spi.ExecutionControl;
@@ -42,6 +44,8 @@ public abstract class JamStrategy implements IJamStrategy {
     protected final MusicMapper musicMapper;
 
     protected final ParticipantService participantService;
+
+    protected final InternalNotificationService internalNotificationService;
 
     @Override
     public void playMusic() {
@@ -97,7 +101,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
         userService.update(currentUser.getId(), currentUser);
 
-        notify(getHostIdFromJam(jam), "User joining", currentUser.getName());
+        notify(getHostProviderIdFromJam(jam), "user-joining", currentUser.getName());
     }
 
     @Override
@@ -120,7 +124,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
         participantService.deleteJamParticipant(jamParticipantEntity);
 
-        notify(getHostIdFromJam(jam), "User leaving", currentUser.getName());
+        notify(getHostProviderIdFromJam(jam), "user-leaving", currentUser.getName());
     }
 
     // FIXME implement ??!!
@@ -194,7 +198,7 @@ public abstract class JamStrategy implements IJamStrategy {
         /**
          * TODO discuss, we should think about giving the user a search input to set a tag for his jam.
          */
-        for (String tagLabel: jamVM.themes()) {
+        for (String tagLabel : jamVM.themes()) {
             Optional<TagEntity> tagEntity = tagsService.findByLabel(tagLabel);
             if (tagEntity.isEmpty()) {
                 TagEntity tagToCreate = new TagEntity();
@@ -260,6 +264,14 @@ public abstract class JamStrategy implements IJamStrategy {
                 .getUserId();
     }
 
+    protected String getHostProviderIdFromJam(JamEntity jam) {
+        return jam.getParticipants().stream().filter(
+                        JamParticipantEntity::isHost
+                ).findFirst().orElseThrow(() -> new IllegalArgumentException("Jam seems to have no host :("))
+                .getUser()
+                .getUserProviderId();
+    }
+
     protected UserEntity getCurrentUser() {
         String currentUserEmail = getCurrentUserEmail();
         return userService.findEntityByEmail(currentUserEmail);
@@ -298,7 +310,7 @@ public abstract class JamStrategy implements IJamStrategy {
         UserEntity user = getCurrentUser();
         Set<JamParticipantEntity> participantEntities = participantService.getFromUserId(user.getId());
 
-        for (JamParticipantEntity participant: participantEntities) {
+        for (JamParticipantEntity participant : participantEntities) {
             if (JamStatusEnum.RUNNING.equals(participant.getJam().getStatus())) {
                 throw new UnauthorizedException("User already has a running jam");
             }
@@ -325,9 +337,17 @@ public abstract class JamStrategy implements IJamStrategy {
         }
     }
 
-    //TODO handle with StreamListeners, set type to an enum, call a notification service
-    protected void notify(Long userId, String type, String message) {
-        log.debug("Notifying the user %d about %s, notification type: %s".formatted(userId, type, message));
+    protected void notify(String userProviderId, String type, String message) {
+        NotificationVM notification = NotificationVM.builder()
+                .destId(userProviderId)
+                .title(type)
+                .content(message)
+                .metadata(
+                        CustomMetadata.builder().objectId("jam:%s".formatted(type)).build()
+                )
+                .build();
+        log.debug("Notifying the user %s about %s, notification type: %s".formatted(userProviderId, type, message));
+        internalNotificationService.sendNotification(notification);
     }
 
     protected Set<UserEntity> getAllUsersInAJam(JamDTO jam) {
@@ -336,6 +356,7 @@ public abstract class JamStrategy implements IJamStrategy {
 
     /**
      * Get all non-host users in a jam
+     *
      * @param jam the jam we want the follower of
      * @return a set of the users in a jam
      */
@@ -344,5 +365,6 @@ public abstract class JamStrategy implements IJamStrategy {
     }
 
     protected abstract void specificPlay(MusicDTO musicDTO, JamDTO jamDTO);
+
     protected abstract void specificPlay(UserEntity host, JamEntity jam);
 }
