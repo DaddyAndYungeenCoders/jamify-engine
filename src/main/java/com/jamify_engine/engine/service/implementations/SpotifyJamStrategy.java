@@ -96,20 +96,17 @@ public class SpotifyJamStrategy extends JamStrategy {
     }
 
     protected void playMusicFromSpotifyUri(String spotifyUri, String accessToken) {
+        log.info("REQUESTED SPOTIFY URI FOR TRACK: {}", spotifyUri);
         String targetUri = "/me/player/play";
-
-        HashMap<String, Object> body = new HashMap<>();
-        HashMap<String, Object> offset = new HashMap<>();
-        offset.put("position", 0);
-
-        body.put("uris", Collections.singletonList(spotifyUri));
-        body.put("offset", offset);
-        body.put("position_ms", 0);
 
         spotifyWebClient.put()
                 .uri(targetUri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer %s".formatted(accessToken))
-                .bodyValue(body)
+                .bodyValue(Map.of(
+                        "offset", Map.of("position", 0),
+                        "uris", List.of(spotifyUri),
+                        "position_ms", 0
+                ))
                 .retrieve()
                 .toBodilessEntity()
                 .doOnError(response -> log.error("SPOTIFY WEB CLIENT ERROR: {}", response))
