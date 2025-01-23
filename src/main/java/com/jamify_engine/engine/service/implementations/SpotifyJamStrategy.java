@@ -102,7 +102,7 @@ public class SpotifyJamStrategy extends JamStrategy {
         HashMap<String, Object> offset = new HashMap<>();
         offset.put("position", 0);
 
-        body.put("context_uri", spotifyUri);
+        body.put("uris", Collections.singletonList(spotifyUri));
         body.put("offset", offset);
         body.put("position_ms", 0);
 
