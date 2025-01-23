@@ -10,7 +10,7 @@ import java.util.Map;
 public class PlaylistRequest {
     String uri;
     String providerAccessToken;
-    Long jamifyUserId;
+    String userProviderId;
     String username;
     Map<String, Object> requestBody;
 }

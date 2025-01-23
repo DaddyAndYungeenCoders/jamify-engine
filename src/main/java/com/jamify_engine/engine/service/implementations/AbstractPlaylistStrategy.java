@@ -22,25 +22,25 @@ public abstract class AbstractPlaylistStrategy<D extends PlaylistDTO> implements
     @Override
     public D createAndPopulatePlaylist(PlaylistEndJobVM endJobVM) {
         D playlistDTO = createPlaylistInAGivenUserAccount(
-                endJobVM.getUserId(),
+                endJobVM.getUserProviderId(),
                 endJobVM.getData().getPlaylistName(),
                 endJobVM.getData().getPlaylistDescription(),
                 false
         );
 
-        String providerAccessToken = getProviderAccessToken(endJobVM.getUserId());
+        String providerAccessToken = getProviderAccessToken(endJobVM.getUserProviderId());
 
         return addMusicsToPlaylist(playlistDTO.getId(), endJobVM.getData().getMusics().stream().toList(), providerAccessToken);
     }
 
-    protected UserEntity getGivenUser(Long jamifyUserId) {
-        UserDTO user = userService.findById(jamifyUserId);
+    protected UserEntity getGivenUser(String userProviderId) {
+        UserDTO user = userService.findByUserProviderId(userProviderId);
 
         return userService.findEntityByEmail(user.email());
     }
 
-    protected String getProviderAccessToken(Long jamifyUserId) {
-        UserEntity givenUserAccount = getGivenUser(jamifyUserId);
+    protected String getProviderAccessToken(String userProviderId) {
+        UserEntity givenUserAccount = getGivenUser(userProviderId);
 
         return this.userAccessTokenService.getAccessToken(
                 givenUserAccount.getEmail(), this.provider
@@ -48,5 +48,5 @@ public abstract class AbstractPlaylistStrategy<D extends PlaylistDTO> implements
     }
 
 
-    protected abstract D specificPlaylistCreation(String providerUsername, String providerAccessToken, String playlistName, String playlistDescription, boolean ispublic, Long jamifyUserId);
+    protected abstract D specificPlaylistCreation(String providerUsername, String providerAccessToken, String playlistName, String playlistDescription, boolean ispublic, String userProviderId);
 }
