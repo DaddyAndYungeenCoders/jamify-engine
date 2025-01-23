@@ -41,10 +41,10 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
     }
 
     @Override
-    public SpotifyPlaylistDTO createPlaylistInAGivenUserAccount(Long jamifyUserId, String playlistName, String playlistDescription, boolean ispublic) {
-        UserEntity givenUserAccount = getGivenUser(jamifyUserId);
-        String spotifyAccessToken = getProviderAccessToken(jamifyUserId);
-        return specificPlaylistCreation(givenUserAccount.getUserProviderId(), spotifyAccessToken, playlistName, playlistDescription, ispublic, jamifyUserId);
+    public SpotifyPlaylistDTO createPlaylistInAGivenUserAccount(String userProviderId, String playlistName, String playlistDescription, boolean ispublic) {
+        UserEntity givenUserAccount = getGivenUser(userProviderId);
+        String spotifyAccessToken = getProviderAccessToken(userProviderId);
+        return specificPlaylistCreation(givenUserAccount.getUserProviderId(), spotifyAccessToken, playlistName, playlistDescription, ispublic, userProviderId);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
     }
 
     @Override
-    protected SpotifyPlaylistDTO specificPlaylistCreation(String providerUsername, String providerAccessToken, String playlistName, String playlistDescription, boolean ispublic, Long jamifyUserId) {
+    protected SpotifyPlaylistDTO specificPlaylistCreation(String providerUsername, String providerAccessToken, String playlistName, String playlistDescription, boolean ispublic, String userProviderId) {
         String uri = "/users/%s/playlists".formatted(providerUsername);
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -86,7 +86,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
         PlaylistRequest request = new PlaylistRequest(
                 uri,
                 providerAccessToken,
-                jamifyUserId,
+                userProviderId,
                 providerUsername,
                 requestBody
         );
@@ -123,7 +123,7 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
 
     private Mono<SpotifyPlaylistDTO> handleTokenRefresh(PlaylistRequest request, int retryCount) {
         return Mono.fromCallable(() ->
-                        refreshToken(request.getJamifyUserId())
+                        refreshToken(request.getUserProviderId())
                 )
                 .flatMap(newToken -> {
                     PlaylistRequest newRequest = request.withProviderAccessToken(newToken);
@@ -133,11 +133,12 @@ public class SpotifyPlaylistImpl extends AbstractPlaylistStrategy<SpotifyPlaylis
 
     /**
      * retourner le token rafraichi
-     * @param jamifyUserId
+     * @param userProviderId
      * @return
      */
-    private String refreshToken(Long jamifyUserId) {
-        return userAccessTokenService.refreshAccessToken(jamifyUserId, this.getProviderName());
+    private String refreshToken(String userProviderId) {
+        UserEntity user = getGivenUser(userProviderId);
+        return userAccessTokenService.refreshAccessToken(user.getId(), this.getProviderName());
     }
 
     private List<String> retrieveUrisFromMusicIds(List<Long> musics, String providerAccessToken) {
