@@ -22,13 +22,13 @@ public abstract class AbstractPlaylistStrategy<D extends PlaylistDTO> implements
     @Override
     public D createAndPopulatePlaylist(PlaylistEndJobVM endJobVM) {
         D playlistDTO = createPlaylistInAGivenUserAccount(
-                endJobVM.getUserProviderId(),
+                endJobVM.getUserId(),
                 endJobVM.getData().getPlaylistName(),
                 endJobVM.getData().getPlaylistDescription(),
                 false
         );
 
-        String providerAccessToken = getProviderAccessToken(endJobVM.getUserProviderId());
+        String providerAccessToken = getProviderAccessToken(endJobVM.getUserId());
 
         return addMusicsToPlaylist(playlistDTO.getId(), endJobVM.getData().getMusics().stream().toList(), providerAccessToken);
     }
